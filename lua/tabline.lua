@@ -24,7 +24,7 @@ end
 
 function M.create_component_highlight_group(color, highlight_tag)
   if color.bg and color.fg then
-    local highlight_group_name = table.concat({ 'moonshine', highlight_tag }, '_')
+    local highlight_group_name = table.concat({ 'tabline', highlight_tag }, '_')
     M.highlight(highlight_group_name, color.fg, color.bg)
     return highlight_group_name
   end
@@ -47,6 +47,17 @@ function M.extract_highlight_colors(color_group, scope)
     return color[scope]
   end
   return color
+end
+
+function M.format_buffers(buffers, opt, max_length)
+  if max_length == nil then
+    max_length = vim.o.columns
+  end
+  local line = ''
+  for i, buffer in pairs(buffers) do
+    line = line .. M.format_buffer(buffer, opt)
+  end
+  return line
 end
 
 function M.buffers(opt)
@@ -76,7 +87,7 @@ function M.buffers(opt)
 
   local buffers = {}
   for b = 1, vim.fn.bufnr('$') do
-    if vim.fn.buflisted(b) ~= 0 then
+    if vim.fn.buflisted(b) ~= 0 and vim.fn.getbufvar(b, '&buftype') ~= 'quickfix' then
       buffers[#buffers + 1] = { bufnr = b }
     end
   end
@@ -102,9 +113,7 @@ function M.buffers(opt)
       buffer.aftercurrent = true
     end
   end
-  for i, buffer in pairs(buffers) do
-    line = line .. M.format_buffer(buffer, opt)
-  end
+  line = M.format_buffers(buffers, opt)
   return line
 end
 
@@ -153,9 +162,6 @@ function M.buffer_devicon(buffer, opt)
     dev, devhl = require'nvim-web-devicons'.get_icon(file, vim.fn.expand('#' .. bufnr .. ':e'))
   end
   if dev then
-    local fg = M.extract_highlight_colors(devhl, 'fg')
-    local bg = M.extract_highlight_colors('lualine_a_normal', 'bg')
-    local hl = M.create_component_highlight_group({ bg = bg, fg = fg }, devhl)
     return ' ' .. dev .. ' '
   else
     return ' '
@@ -165,15 +171,15 @@ end
 function M.buffer_separator(buffer, opt)
   local hl = ''
   if buffer.current and buffer.last then
-    hl = '%#moonshine_a_to_c#' .. opt.section_left
+    hl = '%#tabline_a_to_c#' .. opt.section_left
   elseif buffer.last then
-    hl = '%#moonshine_b_to_c#' .. opt.section_left
+    hl = '%#tabline_b_to_c#' .. opt.section_left
   elseif buffer.beforecurrent then
-    hl = '%#moonshine_b_to_a#' .. opt.section_left
+    hl = '%#tabline_b_to_a#' .. opt.section_left
   elseif buffer.current then
-    hl = '%#moonshine_a_to_b#' .. opt.section_left
+    hl = '%#tabline_a_to_b#' .. opt.section_left
   else
-    hl = '%#moonshine_a_to_b#' .. opt.component_left
+    hl = '%#tabline_a_to_b#' .. opt.component_left
   end
   return hl
 end
@@ -194,7 +200,7 @@ end
 
 function M.format_buffer(buffer, opt)
   local line = ''
-  line = line .. M.hl(buffer, opt) .. '%' .. buffer.bufnr .. '@MoonshineSwitchBuffer@' .. M.buffer_devicon(buffer, opt)
+  line = line .. M.hl(buffer, opt) .. '%' .. buffer.bufnr .. '@TablineSwitchBuffer@' .. M.buffer_devicon(buffer, opt)
              .. M.buffer_name(buffer, opt) .. ' ' .. '%T' .. M.buffer_separator(buffer, opt)
   return line
 end
@@ -232,36 +238,38 @@ function M.tabs(opt)
   for t = 1, vim.fn.tabpagenr('$') do
     tabs[#tabs + 1] = { tabnr = t }
   end
-  local line = '%#moonshine_a_to_c#' .. opt.section_right .. '%#lualine_a_normal#' .. ' ( ' .. vim.fn.tabpagenr()
-                   .. ' / ' .. vim.fn.tabpagenr('$') .. ' )'
+  local line = '%#tabline_a_to_c#' .. opt.section_right .. '%#lualine_a_normal#' .. ' ( ' .. vim.fn.tabpagenr() .. ' / '
+                   .. vim.fn.tabpagenr('$') .. ' )'
   return line
 end
 
 function M.setup()
   vim.cmd([[
-    hi default link MoonshineCurrent         TabLineSel
-    hi default link MoonshineActive          PmenuSel
-    hi default link MoonshineHidden          TabLine
-    hi default link MoonshineFill            TabLineFill
+    hi default link TablineCurrent         TabLineSel
+    hi default link TablineActive          PmenuSel
+    hi default link TablineHidden          TabLine
+    hi default link TablineFill            TabLineFill
 
     command! -count   -bang BufferNext             :bnext
     command! -count   -bang BufferPrevious         :bprev
 
-    function MoonshineSwitchBuffer(bufnr, mouseclicks, mousebutton, modifiers)
+    set guioptions-=e
+
+    function! TablineSwitchBuffer(bufnr, mouseclicks, mousebutton, modifiers)
       execute ":b " . a:bufnr
     endfunction
   ]])
 
-  function _G.moonshine_tabline()
-    return M.tab_line_buffers(M.options)
+  function _G.tabline_buffers()
+    return M.buffers(M.options)
   end
 
-  function _G.moonshine_switch_buffer(bufnr)
+  function _G.tabline_switch_buffer(bufnr)
     return M.switch_buffer(bufnr)
   end
 
-  -- vim.o.tabline = '%!v:lua.moonshine_tabline()'
-  -- vim.o.showtabline = 2
+  vim.o.tabline = '%!v:lua.tabline_buffers()'
+  vim.o.showtabline = 2
 end
 
 return M
