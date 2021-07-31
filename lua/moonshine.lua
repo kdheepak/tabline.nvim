@@ -243,15 +243,11 @@ function M.setup()
     hi default link MoonshineActive          PmenuSel
     hi default link MoonshineHidden          TabLine
     hi default link MoonshineFill            TabLineFill
-    hi default link MoonshineModifiedCurrent BufTabLineCurrent
-    hi default link MoonshineModifiedActive  BufTabLineActive
-    hi default link MoonshineModifiedHidden  BufTabLineHidden
 
     command! -count   -bang BufferNext             :bnext
     command! -count   -bang BufferPrevious         :bprev
 
     function MoonshineSwitchBuffer(bufnr, mouseclicks, mousebutton, modifiers)
-      " call luaeval("require'moonshine'.switch_buffer(_A.bufnr)", {'bufnr': a:bufnr})
       execute ":b " . a:bufnr
     endfunction
   ]])
