@@ -113,6 +113,8 @@ function BufferTab:name()
     return 'quickfix'
   elseif self.filetype == 'TelescopePrompt' then
     return 'Telescope'
+  elseif self.filetype == 'dashboard' then
+    return 'Dashboard'
   elseif self.filetype == 'packer' then
     return 'Packer'
   elseif self.file:sub(self.file:len() - 2, self.file:len()) == 'FZF' then
