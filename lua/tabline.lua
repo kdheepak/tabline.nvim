@@ -346,7 +346,12 @@ function M.buffers(opt)
   local buffers = {}
   for b = 1, vim.fn.bufnr('$') do
     if vim.fn.buflisted(b) ~= 0 and vim.fn.getbufvar(b, '&buftype') ~= 'quickfix' then
-      buffers[#buffers + 1] = Buffer:new{ bufnr = b, options = opt }
+      local buffer = Buffer:new{ bufnr = b, options = opt }
+      if vim.fn.tabpagewinnr(vim.fn.tabpagenr(), '$') == 1 then
+        buffers[#buffers + 1] = buffer
+      elseif buffer.visible then
+        buffers[#buffers + 1] = buffer
+      end
     end
   end
   local line = ''
