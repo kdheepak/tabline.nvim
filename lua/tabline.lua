@@ -268,33 +268,12 @@ function M.tabs(opt)
   if opt == nil then
     opt = M.options
   end
-
-  local fg, bg
-  fg = M.extract_highlight_colors('tabline_a_normal', 'bg')
-  bg = M.extract_highlight_colors('tabline_b_normal', 'bg')
-  M.create_component_highlight_group({ bg = bg, fg = fg }, 'a_to_b')
-  fg = M.extract_highlight_colors('tabline_b_normal', 'bg')
-  bg = M.extract_highlight_colors('tabline_a_normal', 'bg')
-  M.create_component_highlight_group({ bg = bg, fg = fg }, 'b_to_a')
-  fg = M.extract_highlight_colors('tabline_b_normal', 'bg')
-  bg = M.extract_highlight_colors('tabline_c_normal', 'bg')
-  M.create_component_highlight_group({ bg = bg, fg = fg }, 'b_to_c')
-  fg = M.extract_highlight_colors('tabline_c_normal', 'bg')
-  bg = M.extract_highlight_colors('tabline_b_normal', 'bg')
-  M.create_component_highlight_group({ bg = bg, fg = fg }, 'c_to_b')
-  fg = M.extract_highlight_colors('tabline_a_normal', 'bg')
-  bg = M.extract_highlight_colors('tabline_c_normal', 'bg')
-  M.create_component_highlight_group({ bg = bg, fg = fg }, 'a_to_c')
-  fg = M.extract_highlight_colors('tabline_c_normal', 'bg')
-  bg = M.extract_highlight_colors('tabline_a_normal', 'bg')
-  M.create_component_highlight_group({ bg = bg, fg = fg }, 'c_to_a')
-
   local tabs = {}
   for t = 1, vim.fn.tabpagenr('$') do
     tabs[#tabs + 1] = { tabnr = t }
   end
-  local line = '%#tabline_a_to_c#' .. opt.section_right .. '%#tabline_a_normal#' .. ' ( ' .. vim.fn.tabpagenr() .. ' / '
-                   .. vim.fn.tabpagenr('$') .. ' )'
+  local line = '%=%#TabLineFill#%999X' .. '%#tabline_a_to_c#' .. opt.section_right .. '%#tabline_a_normal#' .. ' ('
+                   .. vim.fn.tabpagenr() .. '/' .. vim.fn.tabpagenr('$') .. ') '
   return line
 end
 
@@ -348,11 +327,16 @@ function M.setup()
     return M.buffers(M.options)
   end
 
+  function _G.tabline_buffers_tabs()
+    M.highlight_groups()
+    return M.buffers(M.options) .. M.tabs(M.options)
+  end
+
   function _G.tabline_switch_buffer(bufnr)
     return M.switch_buffer(bufnr)
   end
 
-  vim.o.tabline = '%!v:lua.tabline_buffers()'
+  vim.o.tabline = '%!v:lua.tabline_buffers_tabs()'
   vim.o.showtabline = 2
 end
 
