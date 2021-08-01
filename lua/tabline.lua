@@ -131,7 +131,7 @@ end
 function BufferTab:render()
   local line = ''
   line = line .. M.hl(self) .. '%' .. self.bufnr .. '@TablineSwitchBuffer@' .. ' ' .. self.icon .. ' ' .. self:name()
-             .. ' ' .. '%T' .. self:separator()
+             .. ' ' .. self.modified .. '%T' .. self:separator()
   return line
 end
 
