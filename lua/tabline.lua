@@ -101,9 +101,8 @@ function split(s, delimiter)
 end
 
 function BufferTab:len()
-  local margin = 3
-  return vim.fn.strchars(self:name()) + vim.fn.strchars(self.icon) + vim.fn.strchars(self.options.component_left)
-             + margin
+  local margin = 2
+  return vim.fn.strchars(' ' .. ' ' .. ' ' .. self:name() .. ' ' .. self.modified .. ' ') + margin
 end
 
 function BufferTab:name()
