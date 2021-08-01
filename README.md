@@ -1,4 +1,4 @@
-# moonshine.nvim
+# tabline.nvim
 
 A lualine "buffer and tab" tabline:
 
@@ -8,9 +8,9 @@ https://user-images.githubusercontent.com/1813121/127736189-42e9d6fe-2e88-4265-b
 
 ```
 use {
-  'kdheepak/moonshine.nvim',
+  'kdheepak/tabline.nvim',
   config = function()
-    require'moonshine'.setup {}
+    require'tabline'.setup {}
   end,
   requires = {'hoob3rt/lualine.nvim', 'kyazdani42/nvim-web-devicons'}
 }
@@ -18,12 +18,12 @@ use {
 require'lualine'.setup {
   --- ... ---
   tabline = {
-    lualine_a = { require'moonshine'.buffers },
+    lualine_a = { require'tabline'.buffers },
     lualine_b = {},
     lualine_c = {},
     lualine_x = {},
     lualine_y = {},
-    lualine_z = { require'moonshine'.tabs },
+    lualine_z = { require'tabline'.tabs },
   },
 }
 ```

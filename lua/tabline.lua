@@ -272,8 +272,8 @@ function M.tabs(opt)
   for t = 1, vim.fn.tabpagenr('$') do
     tabs[#tabs + 1] = { tabnr = t }
   end
-  local line = '%=%#TabLineFill#%999X' .. '%#tabline_a_to_c#' .. opt.section_right .. '%#tabline_a_normal#' .. ' ('
-                   .. vim.fn.tabpagenr() .. '/' .. vim.fn.tabpagenr('$') .. ') '
+  local line = '%=%#TabLineFill#%999X' .. '%#tabline_a_to_c#' .. opt.section_right .. '%#tabline_a_normal#' .. ' '
+                   .. vim.fn.tabpagenr() .. '/' .. vim.fn.tabpagenr('$') .. ' '
   return line
 end
 
