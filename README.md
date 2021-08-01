@@ -14,16 +14,4 @@ use {
   end,
   requires = {'hoob3rt/lualine.nvim', 'kyazdani42/nvim-web-devicons'}
 }
-
-require'lualine'.setup {
-  --- ... ---
-  tabline = {
-    lualine_a = { require'tabline'.buffers },
-    lualine_b = {},
-    lualine_c = {},
-    lualine_x = {},
-    lualine_y = {},
-    lualine_z = { require'tabline'.tabs },
-  },
-}
 ```
