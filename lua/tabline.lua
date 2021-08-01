@@ -53,10 +53,6 @@ function M.extract_highlight_colors(color_group, scope)
   return color
 end
 
-local TabNames = {}
-_G.TabNames = TabNames
-M.TabNames = TabNames
-
 local Tab = {}
 
 function Tab:new(tab)
@@ -72,12 +68,15 @@ function Tab:new(tab)
 end
 
 function Tab:get_props()
-  self.name = (TabNames[self.tabnr] or (self.tabnr)) .. ' '
+  local tmp = vim.g.Tabline_tabnames
+  self.name = (tmp['' .. self.tabnr] or (self.tabnr)) .. ' '
   return self
 end
 
 function M.tab_rename(name)
-  TabNames[vim.fn.tabpagenr()] = name
+  local tmp = vim.g.Tabline_tabnames
+  tmp['' .. vim.fn.tabpagenr()] = name
+  vim.g.Tabline_tabnames = tmp
   vim.cmd([[redrawtabline]])
 end
 
@@ -118,7 +117,7 @@ end
 
 function M.format_tabs(tabs, max_length)
   if max_length == nil then
-    max_length = math.floor(vim.o.columns / 2)
+    max_length = math.floor(vim.o.columns / 3)
   end
 
   local line = ''
@@ -167,7 +166,9 @@ function M.format_tabs(tabs, max_length)
     if before ~= nil then
       line = '%#tabline_b_to_c#' .. M.options.section_right .. '%#tabline_b_normal#' .. '...' .. line
     end
-    if after ~= nil then
+    if after ~= nil and i == 1 then
+      line = line .. '%#tabline_b_to_a#' .. M.options.section_right .. '%#tabline_b_normal#' .. '...'
+    elseif after ~= nil then
       line = line .. '%#tabline_a_to_b#' .. M.options.component_right .. '%#tabline_b_normal#' .. '...'
     end
   end
@@ -280,7 +281,7 @@ end
 
 function M.format_buffers(buffers, max_length)
   if max_length == nil then
-    max_length = vim.o.columns - M.total_tab_length
+    max_length = math.max(vim.o.columns * 2 / 3, vim.o.columns - M.total_tab_length)
   end
 
   local line = ''
@@ -384,10 +385,6 @@ function Buffer:hl()
   end
 end
 
-function M.switch_buffer(bufnr)
-  print(bufnr)
-end
-
 function M.tabs(opt)
   if opt == nil then
     opt = M.options
@@ -474,6 +471,8 @@ function M.setup()
       execute ":tab " . a:tabnr
     endfunction
 
+    let g:Tabline_tabnames = get(g:, "Tabline_tabnames", {})
+
     command! -nargs=1 TablineRename lua require('tabline').tab_rename(<f-args>)
   ]])
 
@@ -486,10 +485,6 @@ function M.setup()
     M.highlight_groups()
     local tabs = M.tabs(M.options)
     return M.buffers(M.options) .. tabs
-  end
-
-  function _G.tabline_switch_buffer(bufnr)
-    return M.switch_buffer(bufnr)
   end
 
   vim.o.tabline = '%!v:lua.tabline_buffers_tabs()'
