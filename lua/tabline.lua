@@ -11,7 +11,7 @@ M.options = {
 -- Use luatab as reference:
 -- https://github.com/alvarosevilla95/luatab.nvim
 
-function M.highlight(name, foreground, background)
+function M.highlight(name, foreground, background, gui)
   local command = { 'highlight', name }
   if foreground and foreground ~= 'none' then
     table.insert(command, 'guifg=' .. foreground)
@@ -19,13 +19,16 @@ function M.highlight(name, foreground, background)
   if background and background ~= 'none' then
     table.insert(command, 'guibg=' .. background)
   end
+  if gui and gui ~= 'none' then
+    table.insert(command, 'gui=' .. gui)
+  end
   vim.cmd(table.concat(command, ' '))
 end
 
 function M.create_component_highlight_group(color, highlight_tag)
   if color.bg and color.fg then
     local highlight_group_name = table.concat({ 'tabline', highlight_tag }, '_')
-    M.highlight(highlight_group_name, color.fg, color.bg)
+    M.highlight(highlight_group_name, color.fg, color.bg, color.gui)
     return highlight_group_name
   end
 end
@@ -50,17 +53,25 @@ function M.extract_highlight_colors(color_group, scope)
 end
 
 BufferTab = {}
-function BufferTab:new(self, options)
-  assert(self.bufnr, 'Cannot create BufferTab without bufnr')
-  if options then
-    self.options = options
-  else
-    self.options = M.options
+
+function BufferTab:new(buffer)
+  assert(buffer.bufnr, 'Cannot create BufferTab without bufnr')
+  local newObj = { bufnr = buffer.bufnr, options = buffer.options }
+  if newObj.options == nil then
+    newObj.options = M.options
   end
+  self.__index = self -- 4.
+  newObj = setmetatable(newObj, self)
+  newObj:get_props()
+  return newObj
+end
+
+function BufferTab:get_props()
   self.file = vim.fn.bufname(self.bufnr)
   self.buftype = vim.fn.getbufvar(self.bufnr, '&buftype')
   self.filetype = vim.fn.getbufvar(self.bufnr, '&filetype')
   self.modified = vim.fn.getbufvar(self.bufnr, '&modified') == 1 and '[+] ' or ''
+  self.visible = vim.fn.bufwinid(self.bufnr) ~= -1
   local dev, devhl
   if self.filetype == 'TelescopePrompt' then
     dev, devhl = require'nvim-web-devicons'.get_icon('telescope')
@@ -73,26 +84,41 @@ function BufferTab:new(self, options)
   else
     dev, devhl = require'nvim-web-devicons'.get_icon(self.file, vim.fn.expand('#' .. self.bufnr .. ':e'))
   end
-  self.icon = dev
+  if dev then
+    self.icon = dev
+  else
+    self.icon = ''
+  end
   return self
 end
 
-function BufferTab:length(self)
-  local margin = 4
-  return vim.fn.strchars(self.name) + margin
+function split(s, delimiter)
+  local result = {};
+  for match in (s .. delimiter):gmatch('(.-)' .. delimiter) do
+    table.insert(result, match);
+  end
+  return result;
 end
 
-function BufferTab:name(self)
+function BufferTab:len()
+  local margin = 3
+  return vim.fn.strchars(self:name()) + vim.fn.strchars(self.icon) + vim.fn.strchars(self.options.component_left)
+             + margin
+end
+
+function BufferTab:name()
   if self.buftype == 'help' then
     return 'help:' .. vim.fn.fnamemodify(self.file, ':t:r')
   elseif self.buftype == 'quickfix' then
     return 'quickfix'
   elseif self.filetype == 'TelescopePrompt' then
     return 'Telescope'
+  elseif self.filetype == 'packer' then
+    return 'Packer'
   elseif self.file:sub(self.file:len() - 2, self.file:len()) == 'FZF' then
     return 'FZF'
   elseif self.buftype == 'terminal' then
-    local _, mtch = string.match(self.file, 'term:(.*):(%a+)')
+    local mtch = string.match(split(self.file, ' ')[1], 'term:.*:(%a+)')
     return mtch ~= nil and mtch or vim.fn.fnamemodify(vim.env.SHELL, ':t')
   elseif self.file == '' then
     return '[No Name]'
@@ -100,14 +126,14 @@ function BufferTab:name(self)
   return vim.fn.pathshorten(vim.fn.fnamemodify(self.file, ':p:~:t'))
 end
 
-function BufferTab:render(self)
+function BufferTab:render()
   local line = ''
-  line = line .. M.hl(self) .. '%' .. self.bufnr .. '@TablineSwitchBuffer@' .. ' ' .. self.icon .. ' '
-             .. BufferTab:name(self) .. ' ' .. '%T' .. M.buffer_separator(self)
+  line = line .. M.hl(self) .. '%' .. self.bufnr .. '@TablineSwitchBuffer@' .. ' ' .. self.icon .. ' ' .. self:name()
+             .. ' ' .. '%T' .. self:separator()
   return line
 end
 
-function M.buffer_separator(self)
+function BufferTab:separator()
   local hl = ''
   if self.current and self.last then
     hl = '%#tabline_a_to_c#' .. self.options.section_left
@@ -123,20 +149,66 @@ function M.buffer_separator(self)
   return hl
 end
 
-function M.buffer_window_count(buffer, opt)
-  local bufnr = buffer.bufnr
-  local nwins = vim.fn.bufwinnr(bufnr)
+function BufferTab:window_count()
+  local nwins = vim.fn.bufwinnr(self.bufnr)
   return nwins > 1 and '(' .. nwins .. ') ' or ''
 end
 
-function M.format_buffers(buffers, opt, max_length)
+function M.format_buffers(buffers, max_length)
   if max_length == nil then
-    max_length = vim.o.columns
+    max_length = vim.o.columns - 6
   end
+
   local line = ''
+  local total_length = 0
+  local complete = false
+  local current
   for i, buffer in pairs(buffers) do
-    dump(buffer)
-    line = line .. BufferTab:render(buffer)
+    if buffer.current then
+      current = i
+    end
+  end
+  local current_buffer = buffers[current]
+  if current_buffer == nil then
+    local b = BufferTab:new{ bufnr = vim.fn.bufnr() }
+    b.current = true
+    b.last = true
+    return b:render()
+  end
+  line = line .. current_buffer:render()
+  total_length = current_buffer:len()
+  local i = 0
+  local before, after
+  while true do
+    i = i + 1
+    before = buffers[current - i]
+    after = buffers[current + i]
+    if before == nil and after == nil then
+      break
+    end
+    if before then
+      total_length = total_length + before:len()
+    end
+    if after then
+      total_length = total_length + after:len()
+    end
+    if total_length > max_length then
+      break
+    end
+    if before then
+      line = before:render() .. line
+    end
+    if after then
+      line = line .. after:render()
+    end
+  end
+  if total_length > max_length then
+    if before ~= nil then
+      line = '%#lualine_b_normal#...' .. line
+    end
+    if after ~= nil then
+      line = line .. '...'
+    end
   end
   return line
 end
@@ -147,6 +219,9 @@ function M.buffers(opt)
   end
 
   local fg, bg
+  fg = M.extract_highlight_colors('lualine_b_normal', 'fg')
+  bg = M.extract_highlight_colors('lualine_b_normal', 'bg')
+  M.create_component_highlight_group({ bg = bg, fg = fg, gui = 'bold' }, 'b_normal_bold')
   fg = M.extract_highlight_colors('lualine_a_normal', 'bg')
   bg = M.extract_highlight_colors('lualine_b_normal', 'bg')
   M.create_component_highlight_group({ bg = bg, fg = fg }, 'a_to_b')
@@ -169,7 +244,7 @@ function M.buffers(opt)
   local buffers = {}
   for b = 1, vim.fn.bufnr('$') do
     if vim.fn.buflisted(b) ~= 0 and vim.fn.getbufvar(b, '&buftype') ~= 'quickfix' then
-      buffers[#buffers + 1] = BufferTab:new{ bufnr = b }
+      buffers[#buffers + 1] = BufferTab:new{ bufnr = b, options = opt }
     end
   end
   local line = ''
@@ -194,13 +269,15 @@ function M.buffers(opt)
       buffer.aftercurrent = true
     end
   end
-  line = M.format_buffers(buffers, opt)
+  line = M.format_buffers(buffers)
   return line
 end
 
 function M.hl(buffer, opt)
   if buffer.current then
     return '%#lualine_a_normal#'
+  elseif buffer.visible then
+    return '%#tabline_b_normal_bold#'
   else
     return '%#lualine_b_normal#'
   end
