@@ -204,7 +204,7 @@ function M.format_buffers(buffers, max_length)
   end
   if total_length > max_length then
     if before ~= nil then
-      line = '%#lualine_b_normal#...' .. line
+      line = '%#tabline_b_normal#...' .. line
     end
     if after ~= nil then
       line = line .. '...'
@@ -217,29 +217,6 @@ function M.buffers(opt)
   if opt == nil then
     opt = M.options
   end
-
-  local fg, bg
-  fg = M.extract_highlight_colors('lualine_b_normal', 'fg')
-  bg = M.extract_highlight_colors('lualine_b_normal', 'bg')
-  M.create_component_highlight_group({ bg = bg, fg = fg, gui = 'bold' }, 'b_normal_bold')
-  fg = M.extract_highlight_colors('lualine_a_normal', 'bg')
-  bg = M.extract_highlight_colors('lualine_b_normal', 'bg')
-  M.create_component_highlight_group({ bg = bg, fg = fg }, 'a_to_b')
-  fg = M.extract_highlight_colors('lualine_b_normal', 'bg')
-  bg = M.extract_highlight_colors('lualine_a_normal', 'bg')
-  M.create_component_highlight_group({ bg = bg, fg = fg }, 'b_to_a')
-  fg = M.extract_highlight_colors('lualine_b_normal', 'bg')
-  bg = M.extract_highlight_colors('lualine_c_normal', 'bg')
-  M.create_component_highlight_group({ bg = bg, fg = fg }, 'b_to_c')
-  fg = M.extract_highlight_colors('lualine_c_normal', 'bg')
-  bg = M.extract_highlight_colors('lualine_b_normal', 'bg')
-  M.create_component_highlight_group({ bg = bg, fg = fg }, 'c_to_b')
-  fg = M.extract_highlight_colors('lualine_a_normal', 'bg')
-  bg = M.extract_highlight_colors('lualine_c_normal', 'bg')
-  M.create_component_highlight_group({ bg = bg, fg = fg }, 'a_to_c')
-  fg = M.extract_highlight_colors('lualine_c_normal', 'bg')
-  bg = M.extract_highlight_colors('lualine_a_normal', 'bg')
-  M.create_component_highlight_group({ bg = bg, fg = fg }, 'c_to_a')
 
   local buffers = {}
   for b = 1, vim.fn.bufnr('$') do
@@ -275,11 +252,11 @@ end
 
 function M.hl(buffer, opt)
   if buffer.current then
-    return '%#lualine_a_normal#'
+    return '%#tabline_a_normal#'
   elseif buffer.visible then
     return '%#tabline_b_normal_bold#'
   else
-    return '%#lualine_b_normal#'
+    return '%#tabline_b_normal#'
   end
 end
 
@@ -293,32 +270,57 @@ function M.tabs(opt)
   end
 
   local fg, bg
-  fg = M.extract_highlight_colors('lualine_a_normal', 'bg')
-  bg = M.extract_highlight_colors('lualine_b_normal', 'bg')
+  fg = M.extract_highlight_colors('tabline_a_normal', 'bg')
+  bg = M.extract_highlight_colors('tabline_b_normal', 'bg')
   M.create_component_highlight_group({ bg = bg, fg = fg }, 'a_to_b')
-  fg = M.extract_highlight_colors('lualine_b_normal', 'bg')
-  bg = M.extract_highlight_colors('lualine_a_normal', 'bg')
+  fg = M.extract_highlight_colors('tabline_b_normal', 'bg')
+  bg = M.extract_highlight_colors('tabline_a_normal', 'bg')
   M.create_component_highlight_group({ bg = bg, fg = fg }, 'b_to_a')
-  fg = M.extract_highlight_colors('lualine_b_normal', 'bg')
-  bg = M.extract_highlight_colors('lualine_c_normal', 'bg')
+  fg = M.extract_highlight_colors('tabline_b_normal', 'bg')
+  bg = M.extract_highlight_colors('tabline_c_normal', 'bg')
   M.create_component_highlight_group({ bg = bg, fg = fg }, 'b_to_c')
-  fg = M.extract_highlight_colors('lualine_c_normal', 'bg')
-  bg = M.extract_highlight_colors('lualine_b_normal', 'bg')
+  fg = M.extract_highlight_colors('tabline_c_normal', 'bg')
+  bg = M.extract_highlight_colors('tabline_b_normal', 'bg')
   M.create_component_highlight_group({ bg = bg, fg = fg }, 'c_to_b')
-  fg = M.extract_highlight_colors('lualine_a_normal', 'bg')
-  bg = M.extract_highlight_colors('lualine_c_normal', 'bg')
+  fg = M.extract_highlight_colors('tabline_a_normal', 'bg')
+  bg = M.extract_highlight_colors('tabline_c_normal', 'bg')
   M.create_component_highlight_group({ bg = bg, fg = fg }, 'a_to_c')
-  fg = M.extract_highlight_colors('lualine_c_normal', 'bg')
-  bg = M.extract_highlight_colors('lualine_a_normal', 'bg')
+  fg = M.extract_highlight_colors('tabline_c_normal', 'bg')
+  bg = M.extract_highlight_colors('tabline_a_normal', 'bg')
   M.create_component_highlight_group({ bg = bg, fg = fg }, 'c_to_a')
 
   local tabs = {}
   for t = 1, vim.fn.tabpagenr('$') do
     tabs[#tabs + 1] = { tabnr = t }
   end
-  local line = '%#tabline_a_to_c#' .. opt.section_right .. '%#lualine_a_normal#' .. ' ( ' .. vim.fn.tabpagenr() .. ' / '
+  local line = '%#tabline_a_to_c#' .. opt.section_right .. '%#tabline_a_normal#' .. ' ( ' .. vim.fn.tabpagenr() .. ' / '
                    .. vim.fn.tabpagenr('$') .. ' )'
   return line
+end
+
+function M.highlight_groups()
+  local fg, bg
+  fg = M.extract_highlight_colors('tabline_b_normal', 'fg')
+  bg = M.extract_highlight_colors('tabline_b_normal', 'bg')
+  M.create_component_highlight_group({ bg = bg, fg = fg, gui = 'bold' }, 'b_normal_bold')
+  fg = M.extract_highlight_colors('tabline_a_normal', 'bg')
+  bg = M.extract_highlight_colors('tabline_b_normal', 'bg')
+  M.create_component_highlight_group({ bg = bg, fg = fg }, 'a_to_b')
+  fg = M.extract_highlight_colors('tabline_b_normal', 'bg')
+  bg = M.extract_highlight_colors('tabline_a_normal', 'bg')
+  M.create_component_highlight_group({ bg = bg, fg = fg }, 'b_to_a')
+  fg = M.extract_highlight_colors('tabline_b_normal', 'bg')
+  bg = M.extract_highlight_colors('tabline_c_normal', 'bg')
+  M.create_component_highlight_group({ bg = bg, fg = fg }, 'b_to_c')
+  fg = M.extract_highlight_colors('tabline_c_normal', 'bg')
+  bg = M.extract_highlight_colors('tabline_b_normal', 'bg')
+  M.create_component_highlight_group({ bg = bg, fg = fg }, 'c_to_b')
+  fg = M.extract_highlight_colors('tabline_a_normal', 'bg')
+  bg = M.extract_highlight_colors('tabline_c_normal', 'bg')
+  M.create_component_highlight_group({ bg = bg, fg = fg }, 'a_to_c')
+  fg = M.extract_highlight_colors('tabline_c_normal', 'bg')
+  bg = M.extract_highlight_colors('tabline_a_normal', 'bg')
+  M.create_component_highlight_group({ bg = bg, fg = fg }, 'c_to_a')
 end
 
 function M.setup()
@@ -327,6 +329,9 @@ function M.setup()
     hi default link TablineActive          PmenuSel
     hi default link TablineHidden          TabLine
     hi default link TablineFill            TabLineFill
+    hi default link tabline_a_normal       lualine_a_normal
+    hi default link tabline_b_normal       lualine_b_normal
+    hi default link tabline_c_normal       lualine_c_normal
 
     command! -count   -bang BufferNext             :bnext
     command! -count   -bang BufferPrevious         :bprev
@@ -339,6 +344,7 @@ function M.setup()
   ]])
 
   function _G.tabline_buffers()
+    M.highlight_groups()
     return M.buffers(M.options)
   end
 
