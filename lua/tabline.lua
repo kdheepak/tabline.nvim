@@ -74,15 +74,15 @@ function Tab:new(tab)
 end
 
 function Tab:get_props()
-  local tmp = vim.g.Tabline_tabnames
+  local tmp = vim.fn.json_decode(vim.g.Tabline_tabnames)
   self.name = (tmp['' .. self.tabnr] or (self.tabnr)) .. ' '
   return self
 end
 
 function M.tab_rename(name)
-  local tmp = vim.g.Tabline_tabnames
+  local tmp = vim.fn.json_decode(vim.g.Tabline_tabnames)
   tmp['' .. vim.fn.tabpagenr()] = name
-  vim.g.Tabline_tabnames = tmp
+  vim.g.Tabline_tabnames = vim.fn.json_encode(tmp)
   vim.cmd([[redrawtabline]])
 end
 
@@ -484,7 +484,7 @@ function M.setup()
       execute ":tab " . a:tabnr
     endfunction
 
-    let g:Tabline_tabnames = get(g:, "Tabline_tabnames", {})
+    let g:Tabline_tabnames = get(g:, "Tabline_tabnames", '{}')
 
     command! -nargs=1 TablineRename lua require('tabline').tab_rename(<f-args>)
 
