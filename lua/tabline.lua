@@ -512,8 +512,8 @@ function M.setup()
     hi default link tabline_b_normal       lualine_b_normal
     hi default link tabline_c_normal       lualine_c_normal
 
-    command! -count   -bang BufferNext             :lua require'tabline'.buffer_next()
-    command! -count   -bang BufferPrevious         :lua require'tabline'.buffer_previous()
+    command! -count   -bang TablineBufferNext             :lua require'tabline'.buffer_next()
+    command! -count   -bang TablineBufferPrevious         :lua require'tabline'.buffer_previous()
 
     set guioptions-=e
 
