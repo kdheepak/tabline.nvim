@@ -8,6 +8,12 @@ M.options = {
   section_right = '',
 }
 M.total_tab_length = 6
+M.show_all_buffers = false
+
+function M.toggle_show_all_buffers()
+  M.show_all_buffers = not M.show_all_buffers
+  vim.cmd [[redrawtabline]]
+end
 
 -- Use luatab as reference:
 -- https://github.com/alvarosevilla95/luatab.nvim
@@ -351,6 +357,8 @@ function M.buffers(opt)
         buffers[#buffers + 1] = buffer
       elseif buffer.visible then
         buffers[#buffers + 1] = buffer
+      elseif M.show_all_buffers then
+        buffers[#buffers + 1] = buffer
       end
     end
   end
@@ -479,6 +487,8 @@ function M.setup()
     let g:Tabline_tabnames = get(g:, "Tabline_tabnames", {})
 
     command! -nargs=1 TablineRename lua require('tabline').tab_rename(<f-args>)
+
+    command! TablineToggleShowAllBuffers lua require('tabline').toggle_show_all_buffers()
   ]])
 
   function _G.tabline_buffers()
