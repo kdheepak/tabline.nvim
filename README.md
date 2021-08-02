@@ -1,4 +1,3 @@
-
 # tabline.nvim
 
 A "buffer and tab" tabline:
@@ -8,6 +7,8 @@ A "buffer and tab" tabline:
 - Show buffers and tabs in tabline
 - Use same style as lualine by default
 - Bold buffers that are visible
+- Ability to name tabs
+- Toggle showing buffers per tabs
 
 ### Install
 
