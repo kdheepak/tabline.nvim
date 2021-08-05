@@ -1,5 +1,7 @@
 local M = {}
 
+local term = require 'tabline.term'
+
 M.options = {
   no_name = '[No Name]',
   component_left = '',
@@ -386,6 +388,36 @@ function M._current_tab(tab)
     data[vim.fn.tabpagenr()] = tab
     vim.g.Tabline_tab_data = vim.fn.json_encode(data)
   end
+end
+
+function M.bind_buffers()
+  local fzf = require'fzf'.fzf
+  local action = require'fzf.actions'.action
+
+  local function get_buf_number(line)
+    return tonumber(string.match(line, '%[(%d+)'))
+  end
+
+  coroutine.wrap(function()
+    local shell = action(function(items, _, _)
+      local item = items[1]
+      local buf = get_buf_number(item)
+      return vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+    end)
+
+    local buffers = {}
+    for b = 1, vim.fn.bufnr('$') do
+      if vim.fn.buflisted(b) ~= 0 and vim.fn.getbufvar(b, '&buftype') ~= 'quickfix' then
+        local buffer = Buffer:new{ bufnr = b }
+        local item_string = string.format('[%s] %s', term.cyan .. tostring(buffer.bufnr) .. term.reset, buffer.name)
+        buffers[#buffers + 1] = item_string
+      end
+    end
+    local choices = fzf(buffers, '--preview ' .. shell)
+    if not choices then
+      return
+    end
+  end)()
 end
 
 function M.tabline_buffers(opt)
