@@ -236,7 +236,8 @@ function Buffer:get_props()
   self.file = vim.fn.bufname(self.bufnr)
   self.buftype = vim.fn.getbufvar(self.bufnr, '&buftype')
   self.filetype = vim.fn.getbufvar(self.bufnr, '&filetype')
-  self.modified = vim.fn.getbufvar(self.bufnr, '&modified') == 1 and '[+] ' or ''
+  self.modified = vim.fn.getbufvar(self.bufnr, '&modified') == 1
+  self.modified_icon = self.modified and '[+] ' or ''
   self.visible = vim.fn.bufwinid(self.bufnr) ~= -1
   local dev, devhl
   if self.filetype == 'TelescopePrompt' then
@@ -269,7 +270,7 @@ end
 
 function Buffer:len()
   local margin = 2
-  return vim.fn.strchars(' ' .. ' ' .. ' ' .. self.name .. ' ' .. self.modified .. ' ') + margin
+  return vim.fn.strchars(' ' .. ' ' .. ' ' .. self.name .. ' ' .. self.modified_icon .. ' ') + margin
 end
 
 function Buffer:name()
@@ -296,7 +297,7 @@ end
 
 function Buffer:render()
   local line = self:hl() .. '%' .. self.bufnr .. '@TablineSwitchBuffer@' .. ' ' .. self.icon .. ' ' .. self.name .. ' '
-                   .. self.modified .. '%T' .. self:separator()
+                   .. self.modified_icon .. '%T' .. self:separator()
   return line
 end
 
@@ -468,10 +469,16 @@ function M.tabline_buffers(opt)
 end
 
 function Buffer:hl()
-  if self.current then
+  if self.current and self.modified then
+    return '%#tabline_a_normal_bold_italic#'
+  elseif self.current then
     return '%#tabline_a_normal#'
+  elseif self.visible and self.modified then
+    return '%#tabline_b_normal_bold_italic#'
   elseif self.visible then
     return '%#tabline_b_normal_bold#'
+  elseif self.modified then
+    return '%#tabline_b_normal_italic#'
   else
     return '%#tabline_b_normal#'
   end
@@ -520,6 +527,13 @@ function M.highlight_groups()
   fg = M.extract_highlight_colors('tabline_b_normal', 'fg')
   bg = M.extract_highlight_colors('tabline_b_normal', 'bg')
   M.create_component_highlight_group({ bg = bg, fg = fg, gui = 'bold' }, 'b_normal_bold')
+  M.create_component_highlight_group({ bg = bg, fg = fg, gui = 'italic' }, 'b_normal_italic')
+  M.create_component_highlight_group({ bg = bg, fg = fg, gui = 'bold,italic' }, 'b_normal_bold_italic')
+  fg = M.extract_highlight_colors('tabline_a_normal', 'fg')
+  bg = M.extract_highlight_colors('tabline_a_normal', 'bg')
+  M.create_component_highlight_group({ bg = bg, fg = fg, gui = 'bold' }, 'a_normal_bold')
+  M.create_component_highlight_group({ bg = bg, fg = fg, gui = 'italic' }, 'a_normal_italic')
+  M.create_component_highlight_group({ bg = bg, fg = fg, gui = 'bold,italic' }, 'a_normal_bold_italic')
   fg = M.extract_highlight_colors('tabline_a_normal', 'bg')
   bg = M.extract_highlight_colors('tabline_b_normal', 'bg')
   M.create_component_highlight_group({ bg = bg, fg = fg }, 'a_to_b')
