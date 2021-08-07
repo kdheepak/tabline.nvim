@@ -392,6 +392,13 @@ function M._current_tab(tab)
   end
 end
 
+function M.clear_bind_buffers()
+  local data = vim.fn.json_decode(vim.g.Tabline_tab_data)
+  data[vim.fn.tabpagenr()].allowed_buffers = {}
+  data[vim.fn.tabpagenr()].show_all_buffers = true
+  vim.g.Tabline_tab_data = vim.fn.json_encode(data)
+end
+
 function M.bind_buffers(...)
   local args = { ... }
   M._bind_buffers(args)
@@ -662,14 +669,15 @@ function M.setup()
     hi default link tabline_b_normal       lualine_b_normal
     hi default link tabline_c_normal       lualine_c_normal
 
-    command! -count   -bang TablineBufferNext             :lua require'tabline'.buffer_next()
-    command! -count   -bang TablineBufferPrevious         :lua require'tabline'.buffer_previous()
+    command! -count TablineBufferNext             :lua require'tabline'.buffer_next()
+    command! -count TablineBufferPrevious         :lua require'tabline'.buffer_previous()
 
-    command! -count   -bang TablineBufferNext             :lua require'tabline'.buffer_next()
-    command! -count   -bang TablineBufferPrevious         :lua require'tabline'.buffer_previous()
+    command! -count TablineBufferNext             :lua require'tabline'.buffer_next()
+    command! -count TablineBufferPrevious         :lua require'tabline'.buffer_previous()
 
     command! -nargs=* -complete=file TablineTabNew :lua require'tabline'.tab_new(<f-args>)
     command! -nargs=+ -complete=buffer TablineBuffersBind :lua require'tabline'.bind_buffers(<f-args>)
+    command! -complete=buffer TablineBuffersClearBind :lua require'tabline'.clear_bind_buffers()
 
     set guioptions-=e
 
