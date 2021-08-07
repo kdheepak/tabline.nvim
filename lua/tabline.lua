@@ -113,13 +113,13 @@ function M.tab_new(...)
   local args = { ... }
   vim.cmd('tablast | tabnew')
   M._new_tab_data()
-  M.toggle_show_all_buffers()
   local current_tab = M._current_tab()
   for _, file in pairs(args) do
     vim.cmd('edit ' .. file)
     current_tab.allowed_buffers[vim.fn.fnamemodify(file, ':p:~')] = true
   end
   M._current_tab(current_tab)
+  M.toggle_show_all_buffers()
 end
 
 function Tab:render()
@@ -491,8 +491,8 @@ function M.fzf_bind_buffers()
 end
 
 local function contains(list, x)
-  for _, v in pairs(list) do
-    if v == x then
+  for k, v in pairs(list) do
+    if k == x then
       return true
     end
   end
@@ -697,7 +697,7 @@ function M.setup()
 
     let g:Tabline_tab_data = get(g:, "Tabline_tab_data", '{}')
     " {'1': { name = '', show_all_buffers = true, allowed_buffers = {'/path/to/file': true} } }
-    command! -nargs=1 TablineRename lua require('tabline').tab_rename(<f-args>)
+    command! -nargs=1 TablineTabRename lua require('tabline').tab_rename(<f-args>)
 
     command! TablineToggleShowAllBuffers lua require('tabline').toggle_show_all_buffers()
   ]])
