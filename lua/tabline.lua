@@ -394,6 +394,10 @@ end
 
 function M.bind_buffers(...)
   local args = { ... }
+  M._bind_buffers(args)
+end
+
+function M._bind_buffers(args)
   local filelist = {}
   if #args == 0 then
     filelist[#filelist + 1] = vim.fn.expand('%:p:~')
@@ -408,7 +412,72 @@ function M.bind_buffers(...)
   vim.g.Tabline_tab_data = vim.fn.json_encode(data)
 end
 
-function contains(list, x)
+function M.telescope_bind_buffers(opts)
+  local has_telescope, telescope = pcall(require, 'telescope')
+  if not has_telescope then
+    error('This function requires telescope.nvim: https://github.com/nvim-telescope/telescope.nvim')
+  end
+
+  local finders = require('telescope.finders')
+  local pickers = require('telescope.pickers')
+
+  local buffers = {}
+  for b = 1, vim.fn.bufnr('$') do
+    if vim.fn.buflisted(b) ~= 0 and vim.fn.getbufvar(b, '&buftype') ~= 'quickfix' then
+      local buffer = Buffer:new{ bufnr = b }
+      buffers[#buffers + 1] = '[' .. buffer.bufnr .. ']' .. ' ' .. buffer.name
+    end
+  end
+
+  pickers.new(opts, { prompt_title = 'Custom Picker', finder = finders.new_table { results = buffers } }):find()
+end
+
+function M.fzf_bind_buffers()
+  local fzf = require'fzf'.fzf
+  local action = require'fzf.actions'.action
+
+  local function get_buf_number(line)
+    return tonumber(string.match(line, '%[(%d+)'))
+  end
+
+  local shell = action(function(items, fzf_lines, _)
+    local item = items[1]
+    local buf = get_buf_number(item)
+    return vim.api.nvim_buf_get_lines(buf, 0, fzf_lines, false)
+  end)
+
+  coroutine.wrap(function()
+    local buffers = {}
+    for b = 1, vim.fn.bufnr('$') do
+      if vim.fn.buflisted(b) ~= 0 and vim.fn.getbufvar(b, '&buftype') ~= 'quickfix' then
+        local buffer = Buffer:new{ bufnr = b }
+        local item_string = string.format('[%s] %s', term.cyan .. tostring(buffer.bufnr) .. term.reset, buffer.name)
+        buffers[#buffers + 1] = item_string
+      end
+    end
+    local choices = fzf(buffers,
+                        '--layout=reverse --bind=\'f2:toggle-preview,f3:toggle-preview-wrap,shift-down:preview-page-down,shift-up:preview-page-up,ctrl-d:half-page-down,ctrl-u:half-page-up,ctrl-f:page-down,ctrl-b:page-up,ctrl-a:toggle-all,ctrl-l:clear-query\' --prompt=\'Buffers> \' --preview-window=\'nohidden:border:nowrap:right:60%\' --preview='
+                            .. shell
+                            .. ' --height=100% --ansi --info=inline --expect=ctrl-s,ctrl-v,ctrl-x,ctrl-t --multi')
+    if not choices then
+      return
+    end
+
+    local bind_buffers = {}
+
+    for _, name in pairs(choices) do
+      if name ~= '' then
+        local bufnr = get_buf_number(name)
+        bind_buffers[#bind_buffers + 1] = vim.fn.expand('#' .. bufnr .. ':p:~')
+      end
+    end
+
+    M._bind_buffers(bind_buffers)
+
+  end)()
+end
+
+local function contains(list, x)
   for _, v in pairs(list) do
     if v == x then
       return true
