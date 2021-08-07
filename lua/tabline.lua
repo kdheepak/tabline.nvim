@@ -397,6 +397,7 @@ function M.clear_bind_buffers()
   data[vim.fn.tabpagenr()].allowed_buffers = {}
   data[vim.fn.tabpagenr()].show_all_buffers = true
   vim.g.Tabline_tab_data = vim.fn.json_encode(data)
+  vim.cmd [[redrawtabline]]
 end
 
 function M.bind_buffers(...)
@@ -417,6 +418,7 @@ function M._bind_buffers(args)
   data[vim.fn.tabpagenr()].allowed_buffers = filelist
   data[vim.fn.tabpagenr()].show_all_buffers = false
   vim.g.Tabline_tab_data = vim.fn.json_encode(data)
+  vim.cmd [[redrawtabline]]
 end
 
 function M.telescope_bind_buffers(opts)
