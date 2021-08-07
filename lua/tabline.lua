@@ -238,7 +238,7 @@ function Buffer:get_props()
   self.buftype = vim.fn.getbufvar(self.bufnr, '&buftype')
   self.filetype = vim.fn.getbufvar(self.bufnr, '&filetype')
   self.modified = vim.fn.getbufvar(self.bufnr, '&modified') == 1
-  self.modified_icon = self.modified and '[+] ' or ''
+  self.modified_icon = self.modified and ' ' or ''
   self.visible = vim.fn.bufwinid(self.bufnr) ~= -1
   local dev, devhl
   if self.filetype == 'TelescopePrompt' then
@@ -249,6 +249,8 @@ function Buffer:get_props()
     dev, devhl = require'nvim-web-devicons'.get_icon('markdown')
   elseif self.buftype == 'terminal' then
     dev, devhl = require'nvim-web-devicons'.get_icon('zsh')
+  elseif vim.fn.isdirectory(self.file) == 1 then
+    dev, devhl = '', nil
   else
     dev, devhl = require'nvim-web-devicons'.get_icon(self.file, vim.fn.expand('#' .. self.bufnr .. ':e'))
   end
@@ -290,10 +292,12 @@ function Buffer:name()
   elseif self.buftype == 'terminal' then
     local mtch = string.match(split(self.file, ' ')[1], 'term:.*:(%a+)')
     return mtch ~= nil and mtch or vim.fn.fnamemodify(vim.env.SHELL, ':t')
+  elseif vim.fn.isdirectory(self.file) == 1 then
+    return vim.fn.fnamemodify(self.file, ':p:.')
   elseif self.file == '' then
     return '[No Name]'
   end
-  return vim.fn.pathshorten(vim.fn.fnamemodify(self.file, ':p:~:t'))
+  return vim.fn.pathshorten(vim.fn.fnamemodify(self.file, ':p:.'))
 end
 
 function Buffer:render()
