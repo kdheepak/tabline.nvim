@@ -117,7 +117,7 @@ function M.tab_new(...)
   local current_tab = M._current_tab()
   for _, file in pairs(args) do
     vim.cmd('edit ' .. file)
-    current_tab.allowed_buffers['' .. vim.fn.bufnr()] = true
+    current_tab.allowed_buffers[vim.fn.fnamemodify(file, ':p:~')] = true
   end
   M._current_tab(current_tab)
 end
@@ -234,6 +234,7 @@ end
 
 function Buffer:get_props()
   self.file = vim.fn.bufname(self.bufnr)
+  self.filepath = vim.fn.expand('#' .. self.bufnr .. ':p:~')
   self.buftype = vim.fn.getbufvar(self.bufnr, '&buftype')
   self.filetype = vim.fn.getbufvar(self.bufnr, '&filetype')
   self.modified = vim.fn.getbufvar(self.bufnr, '&modified') == 1
@@ -391,34 +392,29 @@ function M._current_tab(tab)
   end
 end
 
-function M.bind_buffers()
-  local fzf = require'fzf'.fzf
-  local action = require'fzf.actions'.action
-
-  local function get_buf_number(line)
-    return tonumber(string.match(line, '%[(%d+)'))
+function M.bind_buffers(...)
+  local args = { ... }
+  local filelist = {}
+  if #args == 0 then
+    filelist[#filelist + 1] = vim.fn.expand('%:p:~')
+  else
+    for _, buffer_name in pairs(args) do
+      filelist[#filelist + 1] = vim.fn.fnamemodify(vim.fn.expand(buffer_name), ':p:~')
+    end
   end
+  local data = vim.fn.json_decode(vim.g.Tabline_tab_data)
+  data[vim.fn.tabpagenr()].allowed_buffers = filelist
+  data[vim.fn.tabpagenr()].show_all_buffers = false
+  vim.g.Tabline_tab_data = vim.fn.json_encode(data)
+end
 
-  coroutine.wrap(function()
-    local shell = action(function(items, _, _)
-      local item = items[1]
-      local buf = get_buf_number(item)
-      return vim.api.nvim_buf_get_lines(buf, 0, -1, false)
-    end)
-
-    local buffers = {}
-    for b = 1, vim.fn.bufnr('$') do
-      if vim.fn.buflisted(b) ~= 0 and vim.fn.getbufvar(b, '&buftype') ~= 'quickfix' then
-        local buffer = Buffer:new{ bufnr = b }
-        local item_string = string.format('[%s] %s', term.cyan .. tostring(buffer.bufnr) .. term.reset, buffer.name)
-        buffers[#buffers + 1] = item_string
-      end
+function contains(list, x)
+  for _, v in pairs(list) do
+    if v == x then
+      return true
     end
-    local choices = fzf(buffers, '--preview ' .. shell)
-    if not choices then
-      return
-    end
-  end)()
+  end
+  return false
 end
 
 function M.tabline_buffers(opt)
@@ -436,7 +432,8 @@ function M.tabline_buffers(opt)
       elseif current_tab.show_all_buffers then
         buffers[#buffers + 1] = buffer
       else
-        if current_tab.allowed_buffers['' .. buffer.bufnr] then
+        local filepath = vim.fn.expand('#' .. buffer.bufnr .. ':p:~')
+        if contains(current_tab.allowed_buffers, filepath) then
           buffers[#buffers + 1] = buffer
         end
       end
@@ -470,7 +467,7 @@ end
 
 function Buffer:hl()
   if self.current and self.modified then
-    return '%#tabline_a_normal_bold_italic#'
+    return '%#tabline_a_normal_italic#'
   elseif self.current then
     return '%#tabline_a_normal#'
   elseif self.visible and self.modified then
@@ -603,6 +600,7 @@ function M.setup()
     command! -count   -bang TablineBufferPrevious         :lua require'tabline'.buffer_previous()
 
     command! -nargs=* -complete=file TablineTabNew :lua require'tabline'.tab_new(<f-args>)
+    command! -nargs=+ -complete=buffer TablineBuffersBind :lua require'tabline'.bind_buffers(<f-args>)
 
     set guioptions-=e
 
@@ -615,7 +613,7 @@ function M.setup()
     endfunction
 
     let g:Tabline_tab_data = get(g:, "Tabline_tab_data", '{}')
-
+    " {'1': { name = '', show_all_buffers = true, allowed_buffers = {'/path/to/file': true} } }
     command! -nargs=1 TablineRename lua require('tabline').tab_rename(<f-args>)
 
     command! TablineToggleShowAllBuffers lua require('tabline').toggle_show_all_buffers()
