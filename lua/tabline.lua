@@ -111,12 +111,21 @@ end
 
 function M.tab_new(...)
   local args = { ... }
-  vim.cmd('tablast | tabnew')
+  if #args >= 1 then
+    vim.cmd('tablast | tabnew ' .. args[1])
+  else
+    vim.cmd('tablast | tabnew')
+  end
   M._new_tab_data()
   local current_tab = M._current_tab()
-  for _, file in pairs(args) do
-    vim.cmd('edit ' .. file)
-    current_tab.allowed_buffers[vim.fn.fnamemodify(file, ':p:~')] = true
+  if #args >= 1 then
+    current_tab.allowed_buffers[vim.fn.fnamemodify(args[1], ':p:~')] = true
+  end
+  for i, file in pairs(args) do
+    if i ~= 1 then
+      vim.cmd('edit ' .. file)
+      current_tab.allowed_buffers[vim.fn.fnamemodify(file, ':p:~')] = true
+    end
   end
   M._current_tab(current_tab)
   M.toggle_show_all_buffers()
