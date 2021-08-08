@@ -676,6 +676,9 @@ end
 
 function M.setup()
   vim.cmd([[
+
+    let g:Tabline_tab_data = get(g:, "Tabline_tab_data", '{}')
+
     hi default link TablineCurrent         TabLineSel
     hi default link TablineActive          PmenuSel
     hi default link TablineHidden          TabLine
@@ -687,14 +690,9 @@ function M.setup()
     command! -count TablineBufferNext             :lua require'tabline'.buffer_next()
     command! -count TablineBufferPrevious         :lua require'tabline'.buffer_previous()
 
-    command! -count TablineBufferNext             :lua require'tabline'.buffer_next()
-    command! -count TablineBufferPrevious         :lua require'tabline'.buffer_previous()
-
     command! -nargs=* -complete=file TablineTabNew :lua require'tabline'.tab_new(<f-args>)
     command! -nargs=+ -complete=buffer TablineBuffersBind :lua require'tabline'.bind_buffers(<f-args>)
     command! -complete=buffer TablineBuffersClearBind :lua require'tabline'.clear_bind_buffers()
-
-    set guioptions-=e
 
     function! TablineSwitchBuffer(bufnr, mouseclicks, mousebutton, modifiers)
       execute ":b " . a:bufnr
@@ -704,8 +702,6 @@ function M.setup()
       execute ":tab " . a:tabnr
     endfunction
 
-    let g:Tabline_tab_data = get(g:, "Tabline_tab_data", '{}')
-    " {'1': { name = '', show_all_buffers = true, allowed_buffers = {'/path/to/file': true} } }
     command! -nargs=1 TablineTabRename lua require('tabline').tab_rename(<f-args>)
 
     command! TablineToggleShowAllBuffers lua require('tabline').toggle_show_all_buffers()
