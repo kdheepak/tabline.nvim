@@ -9,6 +9,7 @@ A "buffer and tab" tabline:
 - Bold buffers that are visible
 - Ability to name tabs
 - Toggle showing buffers per tabs
+- Support nvim-web-devicons
 
 ![](https://user-images.githubusercontent.com/1813121/128622268-173d2d40-a391-4fc7-b3ad-d10f2be97013.gif)
 
