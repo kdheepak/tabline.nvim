@@ -47,7 +47,6 @@ use {
 }
 ```
 
-<!--
 ## Configuration
 
 You can customize the behavior of this extension by setting values for any of the following optional parameters.
@@ -59,7 +58,6 @@ You can customize the behavior of this extension by setting values for any of th
 - `tabline_show_bufnr`
 
   Show bufnr in tabline for each buffer (default = false)
--->
 
 ## Usage
 

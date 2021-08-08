@@ -12,9 +12,9 @@ M.options = {
 M.total_tab_length = 6
 
 function M.toggle_show_all_buffers()
-  local data = vim.fn.json_decode(vim.g.Tabline_tab_data)
+  local data = vim.fn.json_decode(vim.g.tabline_tab_data)
   data[vim.fn.tabpagenr()].show_all_buffers = not data[vim.fn.tabpagenr()].show_all_buffers
-  vim.g.Tabline_tab_data = vim.fn.json_encode(data)
+  vim.g.tabline_tab_data = vim.fn.json_encode(data)
   vim.cmd [[redrawtabline]]
 end
 
@@ -78,7 +78,7 @@ end
 
 function M._new_tab_data(tabnr, data)
   if data == nil then
-    data = vim.fn.json_decode(vim.g.Tabline_tab_data)
+    data = vim.fn.json_decode(vim.g.tabline_tab_data)
   end
   if tabnr == nil then
     tabnr = vim.fn.tabpagenr()
@@ -86,26 +86,26 @@ function M._new_tab_data(tabnr, data)
   if data[tabnr] == nil then
     data[tabnr] = { name = tabnr .. '', show_all_buffers = true, allowed_buffers = {} }
   end
-  vim.g.Tabline_tab_data = vim.fn.json_encode(data)
+  vim.g.tabline_tab_data = vim.fn.json_encode(data)
 end
 
 function Tab:get_props()
   local data
-  data = vim.fn.json_decode(vim.g.Tabline_tab_data)
+  data = vim.fn.json_decode(vim.g.tabline_tab_data)
   if data[self.tabnr] == nil then
     self.name = self.tabnr
     M._new_tab_data(self.tabnr)
   end
-  data = vim.fn.json_decode(vim.g.Tabline_tab_data)
+  data = vim.fn.json_decode(vim.g.tabline_tab_data)
   self.name = data[self.tabnr].name .. ' '
   return self
 end
 
 function M.tab_rename(name)
-  local data = vim.fn.json_decode(vim.g.Tabline_tab_data)
+  local data = vim.fn.json_decode(vim.g.tabline_tab_data)
   M._new_tab_data()
   data[vim.fn.tabpagenr()].name = name
-  vim.g.Tabline_tab_data = vim.fn.json_encode(data)
+  vim.g.tabline_tab_data = vim.fn.json_encode(data)
   vim.cmd([[redrawtabline]])
 end
 
@@ -263,7 +263,7 @@ function Buffer:get_props()
   else
     dev, devhl = require'nvim-web-devicons'.get_icon(self.file, vim.fn.expand('#' .. self.bufnr .. ':e'))
   end
-  if dev then
+  if dev and vim.g.tabline_show_devicons then
     self.icon = dev
   else
     self.icon = ''
@@ -311,7 +311,11 @@ end
 
 function Buffer:render()
   local line = self:hl() .. '%' .. self.bufnr .. '@TablineSwitchBuffer@' .. ' ' .. self.icon .. ' ' .. self.name .. ' '
-                   .. self.modified_icon .. '%T' .. self:separator()
+                   .. self.modified_icon
+  if vim.g.tabline_show_bufnr then
+    line = line .. '[' .. self.bufnr .. '] '
+  end
+  line = line .. '%T' .. self:separator()
   return line
 end
 
@@ -396,20 +400,20 @@ function M.format_buffers(buffers, max_length)
 end
 
 function M._current_tab(tab)
-  local data = vim.fn.json_decode(vim.g.Tabline_tab_data)
+  local data = vim.fn.json_decode(vim.g.tabline_tab_data)
   if tab == nil then
     return data[vim.fn.tabpagenr()]
   else
     data[vim.fn.tabpagenr()] = tab
-    vim.g.Tabline_tab_data = vim.fn.json_encode(data)
+    vim.g.tabline_tab_data = vim.fn.json_encode(data)
   end
 end
 
 function M.clear_bind_buffers()
-  local data = vim.fn.json_decode(vim.g.Tabline_tab_data)
+  local data = vim.fn.json_decode(vim.g.tabline_tab_data)
   data[vim.fn.tabpagenr()].allowed_buffers = {}
   data[vim.fn.tabpagenr()].show_all_buffers = true
-  vim.g.Tabline_tab_data = vim.fn.json_encode(data)
+  vim.g.tabline_tab_data = vim.fn.json_encode(data)
   vim.cmd [[redrawtabline]]
 end
 
@@ -427,10 +431,10 @@ function M._bind_buffers(args)
       filelist[#filelist + 1] = vim.fn.fnamemodify(vim.fn.expand(buffer_name), ':p:~')
     end
   end
-  local data = vim.fn.json_decode(vim.g.Tabline_tab_data)
+  local data = vim.fn.json_decode(vim.g.tabline_tab_data)
   data[vim.fn.tabpagenr()].allowed_buffers = filelist
   data[vim.fn.tabpagenr()].show_all_buffers = false
-  vim.g.Tabline_tab_data = vim.fn.json_encode(data)
+  vim.g.tabline_tab_data = vim.fn.json_encode(data)
   vim.cmd [[redrawtabline]]
 end
 
@@ -677,7 +681,9 @@ end
 function M.setup()
   vim.cmd([[
 
-    let g:Tabline_tab_data = get(g:, "Tabline_tab_data", '{}')
+    let g:tabline_tab_data = get(g:, "tabline_tab_data", '{}')
+    let g:tabline_show_devicons = get(g:, "tabline_show_devicons", v:true)
+    let g:tabline_show_bufnr = get(g:, "tabline_show_bufnr", v:false)
 
     hi default link TablineCurrent         TabLineSel
     hi default link TablineActive          PmenuSel
