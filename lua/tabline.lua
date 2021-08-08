@@ -306,6 +306,11 @@ function Buffer:name()
   elseif self.file == '' then
     return '[No Name]'
   end
+
+  if vim.g.tabline_show_filename_only then
+    return vim.fn.fnamemodify(self.file, ':t')
+  end
+
   return vim.fn.pathshorten(vim.fn.fnamemodify(self.file, ':p:.'))
 end
 
@@ -684,6 +689,7 @@ function M.setup()
     let g:tabline_tab_data = get(g:, "tabline_tab_data", '{}')
     let g:tabline_show_devicons = get(g:, "tabline_show_devicons", v:true)
     let g:tabline_show_bufnr = get(g:, "tabline_show_bufnr", v:false)
+    let g:tabline_show_filename_only = get(g:, "tabline_show_filename_only", v:false)
 
     hi default link TablineCurrent         TabLineSel
     hi default link TablineActive          PmenuSel
