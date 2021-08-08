@@ -12,23 +12,6 @@ A "buffer and tab" tabline:
 
 ![](https://user-images.githubusercontent.com/1813121/128622268-173d2d40-a391-4fc7-b3ad-d10f2be97013.gif)
 
-Add the following to your `.vimrc`:
-
-```
-set guioptions-=e " Use showtabline in gui vim
-set sessionoptions+=tabpages,globals " store tabpages and globals in session
-```
-
-## Documentation
-
-- :TablineBufferNext
-- :TablineBufferPrevious
-- :TablineTabNew
-- :TablineBuffersBind
-- :TablineBuffersClearBind
-- :TablineTabRename
-- :TablineToggleShowAllBuffers
-
 ## Installation
 
 **Using Packer**
@@ -49,6 +32,36 @@ use {
   requires = { { 'hoob3rt/lualine.nvim', opt=true }, 'kyazdani42/nvim-web-devicons' }
 }
 ```
+
+## Usage
+
+`TablineBufferNext`
+
+Move to next buffer in the tabline.
+
+`TablineBufferPrevious`
+
+Move to previous buffer in the tabline.
+
+`TablineTabNew <filename1.ext> <filename2.ext>`
+
+Open a new tab with these files.
+
+`TablineToggleShowAllBuffers`
+
+Toggles whether to show all buffers that are open versus only buffers that are currently visible or bound.
+
+`TablineBuffersBind <filename1.ext> <filename2.ext>`
+
+Bind the current tab's buffers to these files.
+
+`TablineBuffersClearBind`
+
+Clear the binding of current tab's buffers.
+
+`TablineTabRename <name>`
+
+Rename current tab's name.
 
 ## Configuration
 
@@ -92,33 +105,3 @@ require'lualine'.setup {
 ```
 
 Currently, this works best when the buffers and tabs are in section a and section z. Support for other sections will be added in the future.
-
-## Usage
-
-`TablineBufferNext`
-
-> Move to next buffer in the tabline.
-
-`TablineBufferPrevious`
-
-> Move to previous buffer in the tabline.
-
-`TablineTabNew <filename1.ext> <filename2.ext>`
-
-> Open a new tab with these files.
-
-`TablineToggleShowAllBuffers`
-
-> Toggles whether to show all buffers that are open versus only buffers that are currently visible or bound.
-
-`TablineBuffersBind <filename1.ext> <filename2.ext>`
-
-> Bind the current tab's buffers to these files.
-
-`TablineBuffersClearBind`
-
-> Clear the binding of current tab's buffers.
-
-`TablineTabRename <name>`
-
-> Rename current tab's name.
