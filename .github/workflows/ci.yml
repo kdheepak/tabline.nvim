@@ -10,12 +10,12 @@ jobs:
     runs-on: [ubuntu-latest]
     steps:
       - uses: actions/checkout@v2
+      - run: date +%F > todays-date
       - name: Restore cache for today's nightly.
         uses: actions/cache@v2
         with:
           path: build
           key: ${{ runner.os }}-appimage-${{ hashFiles('todays-date') }}
-
       - name: Setup neovim nightly and install plugins
         run: |
           test -d build || {
@@ -41,6 +41,7 @@ jobs:
         run: |
           test -d build && {
             rm -rf ./build/nvim
+            rm -rf todays-date
           }
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
