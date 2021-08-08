@@ -10,6 +10,12 @@ A "buffer and tab" tabline:
 - Ability to name tabs
 - Toggle showing buffers per tabs
 
+
+
+https://user-images.githubusercontent.com/1813121/128620710-ed9d17f2-a651-4d51-a46d-966daf329961.mov
+
+
+
 ### Install
 
 ```
