@@ -63,30 +63,30 @@ You can customize the behavior of this extension by setting values for any of th
 
 ## Usage
 
-'TablineBufferNext'
+`TablineBufferNext`
 
-    Move to next buffer in the tabline.
+> Move to next buffer in the tabline.
 
-'TablineBufferPrevious'
+`TablineBufferPrevious`
 
-    Move to previous buffer in the tabline.
+> Move to previous buffer in the tabline.
 
-'TablineTabNew <filename1.ext> <filename2.ext>'
+`TablineTabNew <filename1.ext> <filename2.ext>`
 
-    Open a new tab with these files.
+> Open a new tab with these files.
 
-'TablineToggleShowAllBuffers'
+`TablineToggleShowAllBuffers`
 
-    Toggles whether to show all buffers that are open versus only buffers that are currently visible or bound.
+> Toggles whether to show all buffers that are open versus only buffers that are currently visible or bound.
 
-'TablineBuffersBind <filename1.ext> <filename2.ext>'
+`TablineBuffersBind <filename1.ext> <filename2.ext>`
 
-    Bind the current tab's buffers to these files.
+> Bind the current tab's buffers to these files.
 
-'TablineBuffersClearBind'
+`TablineBuffersClearBind`
 
-    Clear the binding of current tab's buffers.
+> Clear the binding of current tab's buffers.
 
-'TablineTabRename <name>'
+`TablineTabRename <name>`
 
-    Rename current tab's name.
+> Rename current tab's name.
