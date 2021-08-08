@@ -19,7 +19,7 @@ jobs:
       - name: "Auto Generate docs"
         uses: docker://leiserfg/md2vim
         with:
-        args: '-desc "tabline.nvim - a buffer and tab tabline" README.md doc/tabline.txt'
+          args: '-desc "tabline.nvim - a buffer and tab tabline" README.md doc/tabline.txt'
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: "Auto generate docs"
