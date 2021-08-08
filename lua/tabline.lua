@@ -128,7 +128,9 @@ function M.tab_new(...)
     end
   end
   M._current_tab(current_tab)
-  M.toggle_show_all_buffers()
+  if #args >= 1 then
+    M.toggle_show_all_buffers()
+  end
 end
 
 function Tab:render()
@@ -508,8 +510,8 @@ function M.fzf_bind_buffers()
 end
 
 local function contains(list, x)
-  for k, v in pairs(list) do
-    if k == x then
+  for i, v in pairs(list) do
+    if v == x then
       return true
     end
   end
@@ -588,6 +590,13 @@ function M.tabline_tabs(opt)
   for t = 1, vim.fn.tabpagenr('$') do
     tabs[#tabs + 1] = Tab:new({ tabnr = t, options = opt })
   end
+  local old_data = vim.fn.json_decode(vim.g.tabline_tab_data)
+  local data = {}
+  for t = 1, vim.fn.tabpagenr('$') do
+    data[t] = old_data[t]
+  end
+  vim.g.tabline_tab_data = vim.fn.json_encode(data)
+
   local line = ''
   local current = 0
   for i, tab in pairs(tabs) do
