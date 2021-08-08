@@ -21,13 +21,13 @@ set sessionoptions+=tabpages,globals " store tabpages and globals in session
 
 ## Documentation
 
-:TablineBufferNext
-:TablineBufferPrevious
-:TablineTabNew
-:TablineBuffersBind
-:TablineBuffersClearBind
-:TablineTabRename
-:TablineToggleShowAllBuffers
+- :TablineBufferNext
+- :TablineBufferPrevious
+- :TablineTabNew
+- :TablineBuffersBind
+- :TablineBuffersClearBind
+- :TablineTabRename
+- :TablineToggleShowAllBuffers
 
 ## Installation
 
@@ -37,7 +37,10 @@ set sessionoptions+=tabpages,globals " store tabpages and globals in session
 use {
   'kdheepak/tabline.nvim',
   config = function()
-    require'tabline'.setup {}
+    require'tabline'.setup {
+      -- Defaults configuration options
+      enable = true
+    }
     vim.cmd[[
       set guioptions-=e " Use showtabline in gui vim
       set sessionoptions+=tabpages,globals " store tabpages and globals in session
@@ -53,11 +56,42 @@ You can customize the behavior of this extension by setting values for any of th
 
 - `tabline_show_devicons`
 
-  Show devicons in tabline for each buffer (default = true)
+Show devicons in tabline for each buffer (default = true)
 
 - `tabline_show_bufnr`
 
-  Show bufnr in tabline for each buffer (default = false)
+Show bufnr in tabline for each buffer (default = false)
+
+- `tabline_show_filename_only`
+
+Show only filename instead of shortened full path (default = false)
+
+## Lualine tabline support
+
+If you'd like to use tabline with lualine's tabline instead, you can do the following:
+
+```lua
+use {
+  'kdheepak/tabline.nvim',
+  config = function()
+    require'tabline'.setup {enable = false}
+  end,
+  requires = {'hoob3rt/lualine.nvim', 'kyazdani42/nvim-web-devicons'}
+}
+
+require'lualine'.setup {
+  tabline = {
+    lualine_a = { require'tabline'.buffers },
+    lualine_b = {},
+    lualine_c = {},
+    lualine_x = {},
+    lualine_y = {},
+    lualine_z = { require'tabline'.tabs },
+  },
+}
+```
+
+Currently, this works best when the buffers and tabs are in section a and section z. Support for other sections will be added in the future.
 
 ## Usage
 

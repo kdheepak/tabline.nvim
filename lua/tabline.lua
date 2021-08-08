@@ -308,7 +308,7 @@ function Buffer:name()
   end
 
   if vim.g.tabline_show_filename_only then
-    return vim.fn.fnamemodify(self.file, ':t')
+    return vim.fn.fnamemodify(self.file, ':p:t')
   end
 
   return vim.fn.pathshorten(vim.fn.fnamemodify(self.file, ':p:.'))
@@ -683,7 +683,13 @@ function M.buffer_previous()
   end
 end
 
-function M.setup()
+function M.setup(opts)
+  if opts == nil then
+    opts = {}
+  end
+  if opts.enable == nil then
+    opts.enable = true
+  end
   vim.cmd([[
 
     let g:tabline_tab_data = get(g:, "tabline_tab_data", '{}')
@@ -725,8 +731,10 @@ function M.setup()
     return M.tabline_buffers(M.options) .. tabs
   end
 
-  vim.o.tabline = '%!v:lua.tabline_buffers_tabs()'
-  vim.o.showtabline = 2
+  if opts.enable then
+    vim.o.tabline = '%!v:lua.tabline_buffers_tabs()'
+    vim.o.showtabline = 2
+  end
 end
 
 return M
