@@ -103,4 +103,5 @@ require'lualine'.setup {
 }
 ```
 
-Currently, this works best when the buffers and tabs are in section a and section z. Support for other sections will be added in the future.
+Currently, this works best when the buffers and tabs are in section a and section z respectively.
+Support for other sections will be added in the future.
