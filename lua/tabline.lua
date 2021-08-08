@@ -252,7 +252,10 @@ function Buffer:get_props()
   self.modified_icon = self.modified and ' ' or ''
   self.visible = vim.fn.bufwinid(self.bufnr) ~= -1
   local dev, devhl
-  if self.filetype == 'TelescopePrompt' then
+  local status, _ = pcall(require, 'nvim-web-devicons')
+  if not status then
+    dev, devhl = '', ''
+  elseif self.filetype == 'TelescopePrompt' then
     dev, devhl = require('nvim-web-devicons').get_icon('telescope')
   elseif self.filetype == 'fugitive' then
     dev, devhl = require('nvim-web-devicons').get_icon('git')

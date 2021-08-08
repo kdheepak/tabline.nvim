@@ -28,7 +28,7 @@ use {
       set sessionoptions+=tabpages,globals " store tabpages and globals in session
     ]]
   end,
-  requires = { { 'hoob3rt/lualine.nvim', opt=true }, 'kyazdani42/nvim-web-devicons' }
+  requires = { { 'hoob3rt/lualine.nvim', opt=true }, {i 'kyazdani42/nvim-web-devicons', opt = true} }
 }
 ```
 
