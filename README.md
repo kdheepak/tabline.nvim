@@ -1,3 +1,4 @@
+
 # tabline.nvim
 
 A "buffer and tab" tabline:
@@ -11,9 +12,7 @@ A "buffer and tab" tabline:
 - Toggle showing buffers per tabs
 
 
-
-https://user-images.githubusercontent.com/1813121/128620710-ed9d17f2-a651-4d51-a46d-966daf329961.mov
-
+![](https://user-images.githubusercontent.com/1813121/128622268-173d2d40-a391-4fc7-b3ad-d10f2be97013.gif)
 
 
 ### Install
