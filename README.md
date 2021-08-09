@@ -33,7 +33,7 @@ use {
       set sessionoptions+=tabpages,globals " store tabpages and globals in session
     ]]
   end,
-  requires = { { 'hoob3rt/lualine.nvim', opt=true }, { 'kyazdani42/nvim-web-devicons', opt = true} }
+  requires = { { 'hoob3rt/lualine.nvim', opt=true }, {i 'kyazdani42/nvim-web-devicons', opt = true} }
 }
 ```
 
@@ -82,3 +82,31 @@ Show bufnr in tabline for each buffer (default = false)
 - `tabline_show_filename_only`
 
 Show only filename instead of shortened full path (default = false)
+
+## Lualine tabline support
+
+If you'd like to use tabline with lualine's tabline instead, you can do the following:
+
+```lua
+use {
+  'kdheepak/tabline.nvim',
+  config = function()
+    require'tabline'.setup {enable = false}
+  end,
+  requires = {'hoob3rt/lualine.nvim', 'kyazdani42/nvim-web-devicons'}
+}
+
+require'lualine'.setup {
+  tabline = {
+    lualine_a = {},
+    lualine_b = {},
+    lualine_c = { require'tabline'.tabline_buffers },
+    lualine_x = { require'tabline'.tabline_tabs },
+    lualine_y = {},
+    lualine_z = {},
+  },
+}
+```
+
+Currently, this works best when the buffers and tabs are in section `lualine_c` and `lualine_x` respectively.
+Support for other sections will be added in the future.
