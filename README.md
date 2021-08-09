@@ -23,7 +23,7 @@ use {
     require'tabline'.setup {
       -- Defaults configuration options
       enable = true
-      options = {
+      options = { -- if lualine is installed tabline will use separators configured in lualine by default. These options override those settings
         section_separators = {'', ''},
         component_separators = {'', ''},
       }
