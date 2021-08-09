@@ -83,6 +83,7 @@ Show bufnr in tabline for each buffer (default = false)
 
 Show only filename instead of shortened full path (default = false)
 
+<!--
 ## Lualine tabline support
 
 If you'd like to use tabline with lualine's tabline instead, you can do the following:
@@ -98,15 +99,16 @@ use {
 
 require'lualine'.setup {
   tabline = {
-    lualine_a = { require'tabline'.buffers },
+    lualine_a = { require'tabline'.tabline_buffers },
     lualine_b = {},
     lualine_c = {},
     lualine_x = {},
     lualine_y = {},
-    lualine_z = { require'tabline'.tabs },
+    lualine_z = { require'tabline'.tabline_tabs },
   },
 }
 ```
 
 Currently, this works best when the buffers and tabs are in section a and section z respectively.
 Support for other sections will be added in the future.
+-->

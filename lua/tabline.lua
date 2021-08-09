@@ -760,8 +760,9 @@ function M.setup(opts)
     command! TablineToggleShowAllBuffers lua require('tabline').toggle_show_all_buffers()
   ]])
 
+  M.highlight_groups()
+
   function _G.tabline_buffers_tabs()
-    M.highlight_groups()
     local tabs = M.tabline_tabs(M.options)
     return M.tabline_buffers(M.options) .. tabs
   end
