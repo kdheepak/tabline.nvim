@@ -696,11 +696,35 @@ end
 
 function M.setup(opts)
   if opts == nil then
-    opts = {}
+    opts = { enable = true }
   end
   if opts.enable == nil then
     opts.enable = true
   end
+  if opts.options == nil then
+    opts.options = {}
+  end
+
+  local status, _ = pcall(require, 'lualine.config')
+  if status then
+    local cs = require'lualine.config'.config.options.component_separators
+    local ss = require'lualine.config'.config.options.section_separators
+    M.options.component_left = cs[1]
+    M.options.component_right = cs[2]
+    M.options.section_left = ss[1]
+    M.options.section_right = ss[2]
+  end
+
+  if opts.options.component_separators ~= nil then
+    M.options.component_left = opts.options.component_separators[1]
+    M.options.component_right = opts.options.component_separators[2]
+  end
+
+  if opts.options.section_separators ~= nil then
+    M.options.section_left = opts.options.section_separators[1]
+    M.options.section_right = opts.options.section_separators[2]
+  end
+
   vim.cmd([[
 
     let g:tabline_tab_data = get(g:, "tabline_tab_data", '{}')
