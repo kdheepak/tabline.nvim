@@ -522,6 +522,8 @@ local function contains(list, x)
 end
 
 function M.tabline_buffers(opt)
+  M.highlight_groups()
+
   if opt == nil then
     opt = M.options
   end
@@ -586,6 +588,8 @@ function Buffer:hl()
 end
 
 function M.tabline_tabs(opt)
+  M.highlight_groups()
+
   if opt == nil then
     opt = M.options
   end
@@ -759,8 +763,6 @@ function M.setup(opts)
 
     command! TablineToggleShowAllBuffers lua require('tabline').toggle_show_all_buffers()
   ]])
-
-  M.highlight_groups()
 
   function _G.tabline_buffers_tabs()
     local tabs = M.tabline_tabs(M.options)
