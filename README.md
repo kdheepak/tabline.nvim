@@ -4,6 +4,7 @@ A "buffer and tab" tabline:
 
 - Show buffers and tabs in tabline
 - Use same style as lualine by default
+- Uses same section and component separators as lualine by default
 - Bold buffers that are visible
 - Ability to name tabs
 - Toggle showing buffers per tabs
@@ -22,6 +23,10 @@ use {
     require'tabline'.setup {
       -- Defaults configuration options
       enable = true
+      options = {
+        section_separators = {'', ''},
+        component_separators = {'', ''},
+      }
     }
     vim.cmd[[
       set guioptions-=e " Use showtabline in gui vim
