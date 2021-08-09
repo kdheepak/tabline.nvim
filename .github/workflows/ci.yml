@@ -37,12 +37,6 @@ jobs:
           export PATH="${PWD}/build/:${PATH}"
           export PACKPATH=$HOME/.local/share/nvim/site
           ./build/nvim -u ~/.local/share/nvim/site/pack/vendor/start/babelfish.nvim/scripts/init.lua --headless -c 'luafile ./scripts/generate-docs.lua' -c 'qa'
-      - name: Cleanup
-        run: |
-          test -d build && {
-            rm -rf ./build/nvim
-            rm -rf todays-date
-          }
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: "Auto generate docs"
