@@ -353,6 +353,8 @@ end
 function M.format_buffers(buffers, max_length)
   if max_length == nil then
     max_length = math.max(vim.o.columns * 2 / 3, vim.o.columns - M.total_tab_length)
+  else
+    max_length = math.min(math.floor(vim.o.columns * max_length / 100), vim.o.columns - M.total_tab_length)
   end
 
   local line = ''
@@ -567,7 +569,7 @@ function M.tabline_buffers(opt)
       buffer.aftercurrent = true
     end
   end
-  line = M.format_buffers(buffers)
+  line = M.format_buffers(buffers, M.max_bufferline_percent)
   return line
 end
 
@@ -727,6 +729,12 @@ function M.setup(opts)
   if opts.options.section_separators ~= nil then
     M.options.section_left = opts.options.section_separators[1]
     M.options.section_right = opts.options.section_separators[2]
+  end
+
+  if opts.options.max_bufferline_percent then
+    if opts.options.max_bufferline_percent <= 100 and opts.options.max_bufferline_percent >= 0 then
+      M.max_bufferline_percent = opts.options.max_bufferline_percent
+    end
   end
 
   vim.cmd([[
