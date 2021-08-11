@@ -535,11 +535,11 @@ function M.tabline_buffers(opt)
       local buffer = Buffer:new({ bufnr = b, options = opt })
       if buffer.visible then
         buffers[#buffers + 1] = buffer
-      elseif current_tab.show_all_buffers then
+      elseif current_tab and current_tab.show_all_buffers then
         buffers[#buffers + 1] = buffer
       else
         local filepath = vim.fn.expand('#' .. buffer.bufnr .. ':p:~')
-        if contains(current_tab.allowed_buffers, filepath) then
+        if current_tab and contains(current_tab.allowed_buffers, filepath) then
           buffers[#buffers + 1] = buffer
         end
       end
