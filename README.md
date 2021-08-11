@@ -29,7 +29,7 @@ use {
       -- These options can be used to override those settings.
         section_separators = {'', ''},
         component_separators = {'', ''},
-        max_bufferline_percent = 66,
+        max_bufferline_percent = 66, -- set to nil by default, and it uses vim.o.columns * 2/3
       }
     }
     vim.cmd[[
