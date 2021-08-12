@@ -757,7 +757,7 @@ function M.setup(opts)
 
     command! -nargs=* -complete=file TablineTabNew :lua require'tabline'.tab_new(<f-args>)
     command! -nargs=+ -complete=buffer TablineBuffersBind :lua require'tabline'.bind_buffers(<f-args>)
-    command! -complete=buffer TablineBuffersClearBind :lua require'tabline'.clear_bind_buffers()
+    command! TablineBuffersClearBind :lua require'tabline'.clear_bind_buffers()
 
     function! TablineSwitchBuffer(bufnr, mouseclicks, mousebutton, modifiers)
       execute ":b " . a:bufnr
