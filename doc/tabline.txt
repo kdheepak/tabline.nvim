@@ -4,6 +4,10 @@ tabline.txt            For NVIM v0.4.3             Last change: 2021 August 13
 Table of Contents                                  *tabline-table-of-contents*
 
 1. tabline.nvim                                         |tabline-tabline.nvim|
+2. Installation                                         |tabline-installation|
+3. Usage                                                       |tabline-usage|
+4. Configuration                                       |tabline-configuration|
+5. Lualine tabline support                   |tabline-lualine-tabline-support|
 
 ==============================================================================
 1. tabline.nvim                                         *tabline-tabline.nvim*
@@ -26,7 +30,8 @@ A "buffer and tab" tabline:
 <p class="caption"></p>
 </div>
 
-INSTALLATION                                            *tabline-installation*
+==============================================================================
+2. Installation                                         *tabline-installation*
 
 **Using Packer**
 
@@ -55,61 +60,74 @@ INSTALLATION                                            *tabline-installation*
 <
 
 
-USAGE                                                          *tabline-usage*
+==============================================================================
+3. Usage                                                       *tabline-usage*
 
->TablineBufferNext<
+                                                  *tabline-:TablineBufferNext*
 
-Move to next buffer in the tabline.
+:TablineBufferNext                     Move to next buffer in the tabline.
 
->TablineBufferPrevious<
 
-Move to previous buffer in the tabline.
+                                              *tabline-:TablineBufferPrevious*
 
->TablineTabNew <filename1.ext> <filename2.ext><
+:TablineBufferPrevious                 Move to previous buffer in the tabline.
 
-Open a new tab with these files.
 
->TablineToggleShowAllBuffers<
+                                                      *tabline-:TablineTabNew*
 
-Toggles whether to show all buffers that are open versus only buffers that are
-currently visible or bound.
+:TablineTabNew {filename1.ext} {filename2.ext} Open a new tab with these files.
 
->TablineBuffersBind <filename1.ext> <filename2.ext><
 
-Bind the current tab’s buffers to these files.
+                                        *tabline-:TablineToggleShowAllBuffers*
 
->TablineBuffersClearBind<
+:TablineToggleShowAllBuffers           Toggles whether to show all buffers that
+                                       are open versus only buffers that are
+                                       currently visible or bound.
 
-Clear the binding of current tab’s buffers.
 
->TablineTabRename <name><
+                                                 *tabline-:TablineBuffersBind*
 
-Rename current tab’s name.
+:TablineBuffersBind {filename1.ext} {filename2.ext} Bind the current tab’s
+                                       buffers to these files.
 
-CONFIGURATION                                          *tabline-configuration*
+
+                                            *tabline-:TablineBuffersClearBind*
+
+:TablineBuffersClearBind               Clear the binding of current tab’s
+                                       buffers.
+
+
+                                                   *tabline-:TablineTabRename*
+
+:TablineTabRename {name}               Rename current tab’s name.
+
+
+==============================================================================
+4. Configuration                                       *tabline-configuration*
 
 You can customize the behavior of this extension by setting values for any of
 the following optional parameters.
 
+                                               *tabline-tabline_show_devicons*
 
-- >tabline_show_devicons<
-
-
-Show devicons in tabline for each buffer (default = true)
-
-
-- >tabline_show_bufnr<
+tabline_show_devicons                  Show devicons in tabline for each buffer
+                                       (default = true)
 
 
-Show bufnr in tabline for each buffer (default = false)
+                                                  *tabline-tabline_show_bufnr*
+
+tabline_show_bufnr                     Show bufnr in tabline for each buffer
+                                       (default = false)
 
 
-- >tabline_show_filename_only<
+                                          *tabline-tabline_show_filename_only*
+
+tabline_show_filename_only             Show only filename instead of shortened
+                                       full path (default = false)
 
 
-Show only filename instead of shortened full path (default = false)
-
-LUALINE TABLINE SUPPORT                      *tabline-lualine-tabline-support*
+==============================================================================
+5. Lualine tabline support                   *tabline-lualine-tabline-support*
 
 If you’d like to use tabline with lualine’s tabline instead, you can do the
 following:
