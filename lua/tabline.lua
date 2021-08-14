@@ -524,11 +524,12 @@ local function contains(list, x)
 end
 
 function M.tabline_buffers(opt)
-  M.highlight_groups()
-
   if opt == nil then
     opt = M.options
   end
+  M.highlight_groups()
+
+  M.initialize_tab_data(opt)
   local buffers = {}
   M.buffers = buffers
   local current_tab = M._current_tab()
@@ -589,12 +590,7 @@ function Buffer:hl()
   end
 end
 
-function M.tabline_tabs(opt)
-  M.highlight_groups()
-
-  if opt == nil then
-    opt = M.options
-  end
+function M.initialize_tab_data(opt)
   local tabs = {}
   for t = 1, vim.fn.tabpagenr('$') do
     tabs[#tabs + 1] = Tab:new({ tabnr = t, options = opt })
@@ -605,6 +601,18 @@ function M.tabline_tabs(opt)
     data[t] = old_data[t]
   end
   vim.g.tabline_tab_data = vim.fn.json_encode(data)
+  return tabs
+end
+
+function M.tabline_tabs(opt)
+  if opt == nil then
+    opt = M.options
+  end
+
+  M.highlight_groups()
+  M.initialize_tab_data(opt)
+
+  local tabs = vim.fn.json_decode(vim.g.tabline_tab_data)
 
   local line = ''
   local current = 0
