@@ -1,4 +1,4 @@
-tabline.txt            For NVIM v0.4.3             Last change: 2021 August 13
+tabline.txt            For NVIM v0.4.3             Last change: 2021 August 14
 
 ==============================================================================
 Table of Contents                                  *tabline-table-of-contents*
@@ -157,4 +157,8 @@ following:
 Currently, this works best when the buffers and tabs are in section >lualine_c<
 and >lualine_x< respectively. Support for other sections will be added in the
 future.
+==============================================================================
+Links                                                          *tabline-links*
+
+
 vim:tw=78:ts=8:noet:ft=help:norl:
