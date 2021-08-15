@@ -30,7 +30,7 @@ use {
         section_separators = {'', ''},
         component_separators = {'', ''},
         max_bufferline_percent = 66, -- set to nil by default, and it uses vim.o.columns * 2/3
-        always_show_tabline = false, -- by default, this shows tabs only when there are more than one tab or if the first tab is named
+        always_show_tabs = false, -- by default, this shows tabs only when there are more than one tab or if the first tab is named
       }
     }
     vim.cmd[[

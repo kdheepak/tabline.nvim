@@ -227,7 +227,7 @@ function M.format_tabs(tabs, max_length)
     end
   end
   M.total_tab_length = total_length
-  if M.options.always_show_tabline then
+  if M.options.always_show_tabs then
     line = '%=%#TabLineFill#%999X' .. line
   elseif #tabs == 1 and tabs[1].name ~= '1 ' then
     line = '%=%#TabLineFill#%999X' .. line
@@ -754,8 +754,8 @@ function M.setup(opts)
     end
   end
 
-  if opts.options.always_show_tabline then
-    M.options.always_show_tabline = opts.options.always_show_tabline
+  if opts.options.always_show_tabs then
+    M.options.always_show_tabs = opts.options.always_show_tabs
   end
 
   vim.cmd([[
