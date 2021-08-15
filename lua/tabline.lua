@@ -172,7 +172,6 @@ function M.format_tabs(tabs, max_length)
   if max_length == nil then
     max_length = math.floor(vim.o.columns / 3)
   end
-
   local line = ''
   local total_length = 0
   local current
@@ -186,46 +185,58 @@ function M.format_tabs(tabs, max_length)
     local t = Tab:new({ tabnr = vim.fn.tabpagenr() })
     t.current = true
     t.last = true
-    return t:render()
-  end
-  line = line .. current_tab:render()
-  total_length = current_tab:len()
-  local i = 0
-  local before, after
-  while true do
-    i = i + 1
-    before = tabs[current - i]
-    after = tabs[current + i]
-    if before == nil and after == nil then
-      break
-    end
-    if before then
-      total_length = total_length + before:len()
-    end
-    if after then
-      total_length = total_length + after:len()
+    total_length = t:len()
+    line = t:render()
+  else
+    line = line .. current_tab:render()
+    total_length = current_tab:len()
+    local i = 0
+    local before, after
+    while true do
+      i = i + 1
+      before = tabs[current - i]
+      after = tabs[current + i]
+      if before == nil and after == nil then
+        break
+      end
+      if before then
+        total_length = total_length + before:len()
+      end
+      if after then
+        total_length = total_length + after:len()
+      end
+      if total_length > max_length then
+        break
+      end
+      if before then
+        line = before:render() .. line
+      end
+      if after then
+        line = line .. after:render()
+      end
     end
     if total_length > max_length then
-      break
-    end
-    if before then
-      line = before:render() .. line
-    end
-    if after then
-      line = line .. after:render()
-    end
-  end
-  if total_length > max_length then
-    if before ~= nil then
-      line = '%#tabline_b_to_c#' .. M.options.section_right .. '%#tabline_b_normal#' .. '...' .. line
-    end
-    if after ~= nil and i == 1 then
-      line = line .. '%#tabline_b_to_a#' .. M.options.section_right .. '%#tabline_b_normal#' .. '...'
-    elseif after ~= nil then
-      line = line .. '%#tabline_a_to_b#' .. M.options.component_right .. '%#tabline_b_normal#' .. '...'
+      if before ~= nil then
+        line = '%#tabline_b_to_c#' .. M.options.section_right .. '%#tabline_b_normal#' .. '...' .. line
+      end
+      if after ~= nil and i == 1 then
+        line = line .. '%#tabline_b_to_a#' .. M.options.section_right .. '%#tabline_b_normal#' .. '...'
+      elseif after ~= nil then
+        line = line .. '%#tabline_a_to_b#' .. M.options.component_right .. '%#tabline_b_normal#' .. '...'
+      end
     end
   end
   M.total_tab_length = total_length
+  if M.options.always_show_tabline then
+    line = '%=%#TabLineFill#%999X' .. line
+  elseif #tabs == 1 and tabs[1].name ~= '1 ' then
+    line = '%=%#TabLineFill#%999X' .. line
+  elseif #tabs > 1 then
+    line = '%=%#TabLineFill#%999X' .. line
+  else
+    line = '%=%#TabLineFill#%999X'
+    M.total_tab_length = 0
+  end
   return line
 end
 
@@ -371,41 +382,42 @@ function M.format_buffers(buffers, max_length)
     local b = Buffer:new({ bufnr = vim.fn.bufnr() })
     b.current = true
     b.last = true
-    return b:render()
-  end
-  line = line .. current_buffer:render()
-  total_length = current_buffer:len()
-  local i = 0
-  local before, after
-  while true do
-    i = i + 1
-    before = buffers[current - i]
-    after = buffers[current + i]
-    if before == nil and after == nil then
-      break
-    end
-    if before then
-      total_length = total_length + before:len()
-    end
-    if after then
-      total_length = total_length + after:len()
+    line = b:render()
+  else
+    line = line .. current_buffer:render()
+    total_length = current_buffer:len()
+    local i = 0
+    local before, after
+    while true do
+      i = i + 1
+      before = buffers[current - i]
+      after = buffers[current + i]
+      if before == nil and after == nil then
+        break
+      end
+      if before then
+        total_length = total_length + before:len()
+      end
+      if after then
+        total_length = total_length + after:len()
+      end
+      if total_length > max_length then
+        break
+      end
+      if before then
+        line = before:render() .. line
+      end
+      if after then
+        line = line .. after:render()
+      end
     end
     if total_length > max_length then
-      break
-    end
-    if before then
-      line = before:render() .. line
-    end
-    if after then
-      line = line .. after:render()
-    end
-  end
-  if total_length > max_length then
-    if before ~= nil then
-      line = '%#tabline_b_normal#...' .. M.options.component_left .. line
-    end
-    if after ~= nil then
-      line = line .. '...' .. '%#tabline_b_to_c#' .. M.options.section_left .. '%#tabline_c_normal#'
+      if before ~= nil then
+        line = '%#tabline_b_normal#...' .. M.options.component_left .. line
+      end
+      if after ~= nil then
+        line = line .. '...' .. '%#tabline_b_to_c#' .. M.options.section_left .. '%#tabline_c_normal#'
+      end
     end
   end
   return line
@@ -610,9 +622,7 @@ function M.tabline_tabs(opt)
   end
 
   M.highlight_groups()
-  M.initialize_tab_data(opt)
-
-  local tabs = vim.fn.json_decode(vim.g.tabline_tab_data)
+  local tabs = M.initialize_tab_data(opt)
 
   local line = ''
   local current = 0
@@ -637,7 +647,6 @@ function M.tabline_tabs(opt)
     end
   end
   line = M.format_tabs(tabs)
-  line = '%=%#TabLineFill#%999X' .. line
   return line
   -- local line = '%=%#TabLineFill#%999X' .. '%#tabline_a_to_c#' .. opt.section_right .. '%#tabline_a_normal#' .. ' '
   --                  .. vim.fn.tabpagenr() .. '/' .. vim.fn.tabpagenr('$') .. ' '
