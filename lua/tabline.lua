@@ -582,7 +582,7 @@ function M.tabline_buffers(opt)
       buffer.aftercurrent = true
     end
   end
-  line = M.format_buffers(buffers, M.max_bufferline_percent)
+  line = M.format_buffers(buffers, M.options.max_bufferline_percent)
   return line
 end
 
@@ -750,8 +750,12 @@ function M.setup(opts)
 
   if opts.options.max_bufferline_percent then
     if opts.options.max_bufferline_percent <= 100 and opts.options.max_bufferline_percent >= 0 then
-      M.max_bufferline_percent = opts.options.max_bufferline_percent
+      M.options.max_bufferline_percent = opts.options.max_bufferline_percent
     end
+  end
+
+  if opts.options.always_show_tabline then
+    M.options.always_show_tabline = opts.options.always_show_tabline
   end
 
   vim.cmd([[
