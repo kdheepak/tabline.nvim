@@ -1,4 +1,4 @@
-tabline.txt            For NVIM v0.4.3             Last change: 2021 August 14
+tabline.txt            For NVIM v0.4.3             Last change: 2021 August 15
 
 ==============================================================================
 Table of Contents                                  *tabline-table-of-contents*
