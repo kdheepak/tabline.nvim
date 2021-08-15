@@ -23,7 +23,7 @@ use {
   config = function()
     require'tabline'.setup {
       -- Defaults configuration options
-      enable = true
+      enable = true,
       options = {
       -- If lualine is installed tabline will use separators configured in lualine by default.
       -- These options can be used to override those settings.
@@ -38,7 +38,7 @@ use {
       set sessionoptions+=tabpages,globals " store tabpages and globals in session
     ]]
   end,
-  requires = { { 'hoob3rt/lualine.nvim', opt=true }, {i 'kyazdani42/nvim-web-devicons', opt = true} }
+  requires = { { 'hoob3rt/lualine.nvim', opt=true }, {'kyazdani42/nvim-web-devicons', opt = true} }
 }
 ```
 
