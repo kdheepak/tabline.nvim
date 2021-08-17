@@ -412,7 +412,9 @@ function M.format_buffers(buffers, max_length)
       end
     end
     if total_length > max_length then
-      if before ~= nil then
+      if before ~= nil and i == 1 then
+        line = '%#tabline_b_normal#...' .. '%#tabline_b_to_a#' .. M.options.section_left .. line
+      elseif before ~= nil then
         line = '%#tabline_b_normal#...' .. M.options.component_left .. line
       end
       if after ~= nil then
