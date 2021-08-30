@@ -712,7 +712,7 @@ function M.buffer_next()
     end
   end
   if next ~= nil then
-    vim.cmd("buffer " .. next)
+    vim.cmd("silent! buffer " .. next)
   end
 end
 
