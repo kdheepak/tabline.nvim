@@ -548,9 +548,8 @@ local function contains(list, x)
 end
 
 function M.tabline_buffers(opt)
-  if opt == nil then
-    opt = M.options
-  end
+  opt = M.options
+
   M.highlight_groups()
 
   M.initialize_tab_data(opt)
@@ -629,9 +628,7 @@ function M.initialize_tab_data(opt)
 end
 
 function M.tabline_tabs(opt)
-  if opt == nil then
-    opt = M.options
-  end
+  opt = M.options
 
   M.highlight_groups()
   local tabs = M.initialize_tab_data(opt)
