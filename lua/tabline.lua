@@ -279,7 +279,7 @@ function Buffer:get_props()
   else
     dev, devhl = require("nvim-web-devicons").get_icon(self.file, vim.fn.expand("#" .. self.bufnr .. ":e"))
   end
-  if dev and vim.g.tabline_show_devicons then
+  if dev and M.options.show_devicons then
     self.icon = dev
   else
     self.icon = ""
@@ -323,7 +323,7 @@ function Buffer:name()
     return "[No Name]"
   end
 
-  if vim.g.tabline_show_filename_only then
+  if M.options.show_filename_only then
     return vim.fn.fnamemodify(self.file, ":p:t")
   end
 
@@ -341,7 +341,7 @@ function Buffer:render()
     .. self.name
     .. " "
     .. self.modified_icon
-  if vim.g.tabline_show_bufnr then
+  if M.options.show_bufnr then
     line = line .. "[" .. self.bufnr .. "] "
   end
   line = line .. "%T" .. self:separator()
@@ -727,6 +727,14 @@ function M.buffer_previous()
 end
 
 function M.setup(opts)
+  vim.cmd([[
+    let g:tabline_tab_data = get(g:, "tabline_tab_data", '{}')
+    let g:tabline_show_devicons = get(g:, "tabline_show_devicons", v:true)
+    let g:tabline_show_bufnr = get(g:, "tabline_show_bufnr", v:false)
+    let g:tabline_show_filename_only = get(g:, "tabline_show_filename_only", v:false)
+    let g:tabline_show_tabs_always = get(g:, "tabline_show_tabs_always", v:false)
+  ]])
+
   if opts == nil then
     opts = { enable = true }
   end
@@ -776,16 +784,31 @@ function M.setup(opts)
     end
   end
 
-  if opts.options.always_show_tabs then
-    M.options.always_show_tabs = opts.options.always_show_tabs
+  if opts.options.always_show_tabs or opts.options.show_tabs_always then
+    M.options.show_tabs_always = opts.options.show_tabs_always or opts.options.always_show_tabs
+  else
+    M.options.show_tabs_always = vim.g.tabline_show_tabs_always
+  end
+
+  if opts.options.show_bufnr then
+    M.options.show_bufnr = opts.options.show_bufnr
+  else
+    M.options.show_bufnr = vim.g.tabline_show_bufnr
+  end
+
+  if opts.options.show_devicons then
+    M.options.show_devicons = opts.options.show_devicons
+  else
+    M.options.show_devicons = vim.g.tabline_show_devicons
+  end
+
+  if opts.options.show_filename_only then
+    M.options.show_filename_only = opts.options.show_filename_only
+  else
+    M.options.show_filename_only = vim.g.tabline_show_filename_only
   end
 
   vim.cmd([[
-
-    let g:tabline_tab_data = get(g:, "tabline_tab_data", '{}')
-    let g:tabline_show_devicons = get(g:, "tabline_show_devicons", v:true)
-    let g:tabline_show_bufnr = get(g:, "tabline_show_bufnr", v:false)
-    let g:tabline_show_filename_only = get(g:, "tabline_show_filename_only", v:false)
 
     hi default link TablineCurrent         TabLineSel
     hi default link TablineActive          PmenuSel
