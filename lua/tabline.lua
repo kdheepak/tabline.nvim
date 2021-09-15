@@ -744,16 +744,20 @@ function M.setup(opts)
     if lc.config then
       cs = lc.config.options.component_separators
       ss = lc.config.options.section_separators
+      M.options.component_left = cs[1]
+      M.options.component_right = cs[2]
+      M.options.section_left = ss[1]
+      M.options.section_right = ss[2]
     elseif lc.get_config then
       cs = lc.get_config().options.component_separators
       ss = lc.get_config().options.section_separators
+      M.options.component_left = cs.left
+      M.options.component_right = cs.right
+      M.options.section_left = ss.left
+      M.options.section_right = ss.right
     else
       error("Unable to load separators from lualine")
     end
-    M.options.component_left = cs[1]
-    M.options.component_right = cs[2]
-    M.options.section_left = ss[1]
-    M.options.section_right = ss[2]
   end
 
   if opts.options.component_separators ~= nil then
