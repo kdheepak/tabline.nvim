@@ -312,6 +312,8 @@ function Buffer:name()
     return "Dashboard"
   elseif self.filetype == "packer" then
     return "Packer"
+  elseif self.filetype == "alpha" then
+    return "Alpha"
   elseif self.file:sub(self.file:len() - 2, self.file:len()) == "FZF" then
     return "FZF"
   elseif self.buftype == "terminal" then
@@ -571,6 +573,7 @@ function M.tabline_buffers(opt)
       end
     end
   end
+
   local line = ""
   local current = 0
   for i, buffer in pairs(buffers) do
