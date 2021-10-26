@@ -93,8 +93,8 @@ Show only filename instead of shortened full path (default = false)
 
 # Lualine tabline support
 
-Shadmansaleh's fork of `lualine` now has buffers and tabs as components: <https://github.com/shadmansaleh/lualine.nvim/pull/42>
-If you are not interested in binding buffers to tabs, I'd recommend using those components. They also work well in any section. 
+[`nvim-lualine/lualine.nvim`](https://github.com/nvim-lualine/lualine.nvim) now has buffers and tabs as components.
+If you are not interested in binding buffers to tabs, I'd recommend using those components. They work well in any section.
 
 If you'd still like to use tabline with lualine's tabline instead, you can do the following:
 
