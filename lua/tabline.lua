@@ -580,7 +580,7 @@ function M.tabline_buffers(opt)
     if i == 1 then
       buffer.first = true
     end
-    if i == #buffers then
+    if i == #buffers and not M.options.show_last_separator then
       buffer.last = true
     end
     if buffer.bufnr == vim.fn.bufnr() then
@@ -642,7 +642,7 @@ function M.tabline_tabs(opt)
     if i == 1 then
       tab.first = true
     end
-    if i == #tabs then
+    if i == #tabs and not M.options.show_last_separator then
       tab.last = true
     end
     if tab.tabnr == vim.fn.tabpagenr() then
@@ -735,6 +735,7 @@ function M.setup(opts)
     let g:tabline_show_devicons = get(g:, "tabline_show_devicons", v:true)
     let g:tabline_show_bufnr = get(g:, "tabline_show_bufnr", v:false)
     let g:tabline_show_filename_only = get(g:, "tabline_show_filename_only", v:false)
+    let g:tabline_show_last_separator = get(g:, "tabline_show_last_separator", v:false)
     let g:tabline_show_tabs_always = get(g:, "tabline_show_tabs_always", v:false)
   ]])
 
@@ -809,6 +810,12 @@ function M.setup(opts)
     M.options.show_filename_only = opts.options.show_filename_only
   else
     M.options.show_filename_only = vim.g.tabline_show_filename_only
+  end
+
+  if opts.options.show_last_separator then
+    M.options.show_last_separator = opts.options.show_last_separator
+  else
+    M.options.show_last_separator = vim.g.tabline_show_last_separator
   end
 
   vim.cmd([[
