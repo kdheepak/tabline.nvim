@@ -91,6 +91,10 @@ Show bufnr in tabline for each buffer (default = false)
 
 Show only filename instead of shortened full path (default = false)
 
+### tabline_show_last_separator
+
+Show separator after the last buffer or tab (default = false)
+
 # Lualine tabline support
 
 [`nvim-lualine/lualine.nvim`](https://github.com/nvim-lualine/lualine.nvim) now has buffers and tabs as components.
