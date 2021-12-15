@@ -1,6 +1,7 @@
 local M = {}
 
 local term = require("tabline.term")
+local create_cterm_colors = false
 
 M.options = {
   no_name = "[No Name]",
@@ -10,6 +11,23 @@ M.options = {
   section_right = "",
 }
 M.total_tab_length = 6
+
+---converts cterm, color_name type colors to #rrggbb format
+---@param color string|number
+---@return string
+local function sanitize_color(color)
+  if type(color) == 'string' then
+    if color:sub(1, 1) == '#' then
+      return color
+    end -- RGB value
+    return modules.color_utils.color_name2rgb(color)
+  elseif type(color) == 'number' then
+    if color > 255 then
+      error("What's this it can't be higher then 255 and you've given " .. color)
+    end
+    return modules.color_utils.cterm2rgb(color)
+  end
+end
 
 function M.toggle_show_all_buffers()
   local data = vim.fn.json_decode(vim.g.tabline_tab_data)
@@ -22,14 +40,24 @@ end
 -- https://github.com/alvarosevilla95/luatab.nvim
 
 function M.highlight(name, foreground, background, gui)
+  local color_utils = require "tabline.color_utils"
   local command = { "highlight", name }
+  foreground = sanitize_color(foreground)
+  background = sanitize_color(background)
   if foreground and foreground ~= "none" then
     table.insert(command, "guifg=" .. foreground)
+    if create_cterm_colors then
+      table.insert(command, "ctermfg=" .. color_utils.rgb2cterm(foreground))
+    end
   end
   if background and background ~= "none" then
     table.insert(command, "guibg=" .. background)
+    if create_cterm_colors then
+      table.insert(command, "ctermbg=" .. color_utils.rgb2cterm(background))
+    end
   end
-  if gui and gui ~= "none" then
+  if gui then
+    table.insert(command, "cterm=" .. gui)
     table.insert(command, "gui=" .. gui)
   end
   vim.cmd(table.concat(command, " "))
@@ -666,6 +694,7 @@ function M.tabline_tabs(opt)
 end
 
 function M.highlight_groups()
+  create_cterm_colors = not vim.go.termguicolors
   local fg, bg
   fg = M.extract_highlight_colors("tabline_b_normal", "fg")
   bg = M.extract_highlight_colors("tabline_b_normal", "bg")
