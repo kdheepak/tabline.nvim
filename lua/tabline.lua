@@ -629,15 +629,15 @@ function M.tabline_buffers(opt)
 end
 
 function Buffer:hl()
-  if self.current and self.modified then
+  if self.current and self.modified and M.options.modified_italic then
     return "%#tabline_a_normal_italic#"
   elseif self.current then
     return "%#tabline_a_normal#"
-  elseif self.visible and self.modified then
+  elseif self.visible and self.modified and M.options.modified_italic then
     return "%#tabline_b_normal_bold_italic#"
   elseif self.visible then
     return "%#tabline_b_normal_bold#"
-  elseif self.modified then
+  elseif self.modified and M.options.modified_italic then
     return "%#tabline_b_normal_italic#"
   else
     return "%#tabline_b_normal#"
@@ -852,6 +852,10 @@ function M.setup(opts)
     M.options.modified_icon = opts.options.modified_icon
   else
     M.options.modified_icon = vim.g.tabline_modified_icon
+  end
+
+  if opts.options.modified_italic then
+    M.options.modified_italic = opts.options.modified_italic
   end
 
 

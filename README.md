@@ -35,6 +35,7 @@ use {
         show_bufnr = false, -- this appends [bufnr] to buffer section,
         show_filename_only = false, -- shows base filename only instead of relative path in filename
         modified_icon = "+ ", -- change the default modified icon
+        modified_italic = false, -- set to true by default; this determines whether the filename turns italic if modified
       }
     }
     vim.cmd[[
