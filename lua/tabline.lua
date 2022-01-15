@@ -288,7 +288,7 @@ function Buffer:get_props()
   self.buftype = vim.fn.getbufvar(self.bufnr, "&buftype")
   self.filetype = vim.fn.getbufvar(self.bufnr, "&filetype")
   self.modified = vim.fn.getbufvar(self.bufnr, "&modified") == 1
-  self.modified_icon = self.modified and " " or ""
+  self.modified_icon = self.modified and M.options.modified_icon or ""
   self.visible = vim.fn.bufwinid(self.bufnr) ~= -1
   local dev, devhl
   local status, _ = pcall(require, "nvim-web-devicons")
@@ -766,6 +766,7 @@ function M.setup(opts)
     let g:tabline_show_filename_only = get(g:, "tabline_show_filename_only", v:false)
     let g:tabline_show_last_separator = get(g:, "tabline_show_last_separator", v:false)
     let g:tabline_show_tabs_always = get(g:, "tabline_show_tabs_always", v:false)
+    let g:tabline_modified_icon = get(g:, "tabline_modified_icon", " ")
   ]])
 
   if opts == nil then
@@ -846,6 +847,13 @@ function M.setup(opts)
   else
     M.options.show_last_separator = vim.g.tabline_show_last_separator
   end
+
+  if opts.options.modified_icon then
+    M.options.modified_icon = opts.options.modified_icon
+  else
+    M.options.modified_icon = vim.g.tabline_modified_icon
+  end
+
 
   vim.cmd([[
 
