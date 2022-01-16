@@ -767,6 +767,7 @@ function M.setup(opts)
     let g:tabline_show_last_separator = get(g:, "tabline_show_last_separator", v:false)
     let g:tabline_show_tabs_always = get(g:, "tabline_show_tabs_always", v:false)
     let g:tabline_modified_icon = get(g:, "tabline_modified_icon", " ")
+    let g:tabline_modified_italic = get(g:, "tabline_modified_italic", v:true)
   ]])
 
   if opts == nil then
@@ -854,8 +855,10 @@ function M.setup(opts)
     M.options.modified_icon = vim.g.tabline_modified_icon
   end
 
-  if opts.options.modified_italic then
+  if opts.options.modified_italic == false then
     M.options.modified_italic = opts.options.modified_italic
+  else
+    M.options.modified_italic = vim.g.tabline_modified_italic
   end
 
 
