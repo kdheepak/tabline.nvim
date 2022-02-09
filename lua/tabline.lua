@@ -30,9 +30,9 @@ local function sanitize_color(color)
 end
 
 function M.toggle_show_all_buffers()
-  local data = vim.fn.json_decode(vim.g.tabline_tab_data)
-  data[vim.fn.tabpagenr()].show_all_buffers = not data[vim.fn.tabpagenr()].show_all_buffers
-  vim.g.tabline_tab_data = vim.fn.json_encode(data)
+  local data = vim.t.tabline_data
+  data.show_all_buffers = not data.show_all_buffers
+  vim.t.tabline_data = data
   vim.cmd([[redrawtabline]])
 end
 
@@ -104,36 +104,30 @@ function Tab:new(tab)
   return newObj
 end
 
-function M._new_tab_data(tabnr, data)
-  if data == nil then
-    data = vim.fn.json_decode(vim.g.tabline_tab_data)
-  end
+function M._new_tab_data(tabnr)
   if tabnr == nil then
     tabnr = vim.fn.tabpagenr()
   end
-  if data[tabnr] == nil then
-    data[tabnr] = { name = tabnr .. "", show_all_buffers = true, allowed_buffers = {} }
+  if vim.fn.gettabvar(tabnr, 'tabline_data') == "" then
+    vim.fn.settabvar(tabnr, 'tabline_data', { name = tabnr .. "", show_all_buffers = true, allowed_buffers = {} })
   end
-  vim.g.tabline_tab_data = vim.fn.json_encode(data)
 end
 
 function Tab:get_props()
-  local data
-  data = vim.fn.json_decode(vim.g.tabline_tab_data)
-  if data[self.tabnr] == nil then
-    self.name = self.tabnr
-    M._new_tab_data(self.tabnr)
+  M._new_tab_data(self.tabnr)
+  local data = vim.fn.gettabvar(self.tabnr, 'tabline_data')
+  for k, i in pairs(data) do
+    self[k] = i
   end
-  data = vim.fn.json_decode(vim.g.tabline_tab_data)
-  self.name = data[self.tabnr].name .. " "
+  self.name = self.name .. " "
   return self
 end
 
 function M.tab_rename(name)
-  local data = vim.fn.json_decode(vim.g.tabline_tab_data)
   M._new_tab_data()
-  data[vim.fn.tabpagenr()].name = name
-  vim.g.tabline_tab_data = vim.fn.json_encode(data)
+  local data = vim.t.tabline_data
+  data.name = name
+  vim.t.tabline_data = data
   vim.cmd([[redrawtabline]])
 end
 
@@ -200,60 +194,53 @@ function M.format_tabs(tabs, max_length)
   if max_length == nil then
     max_length = math.floor(vim.o.columns / 3)
   end
+
   local line = ""
   local total_length = 0
-  local current
-  for i, tab in pairs(tabs) do
-    if tab.current then
-      current = i
-    end
-  end
+  local current = vim.fn.tabpagenr()
   local current_tab = tabs[current]
-  if current_tab == nil then
-    local t = Tab:new({ tabnr = vim.fn.tabpagenr() })
-    t.current = true
-    t.last = true
-    total_length = t:len()
-    line = t:render()
-  else
-    line = line .. current_tab:render()
-    total_length = current_tab:len()
-    local i = 0
-    local before, after
-    while true do
-      i = i + 1
-      before = tabs[current - i]
-      after = tabs[current + i]
-      if before == nil and after == nil then
-        break
-      end
-      if before then
-        total_length = total_length + before:len()
-      end
-      if after then
-        total_length = total_length + after:len()
-      end
-      if total_length > max_length then
-        break
-      end
-      if before then
-        line = before:render() .. line
-      end
-      if after then
-        line = line .. after:render()
-      end
+  assert(not(current_tab == nil))
+  current_tab.current = 1
+
+  line = line .. current_tab:render()
+  total_length = current_tab:len()
+  local i = 0
+  local before, after
+  while true do
+    i = i + 1
+    before = tabs[current - i]
+    after = tabs[current + i]
+    if before == nil and after == nil then
+      break
+    end
+    if before then
+      total_length = total_length + before:len()
+    end
+    if after then
+      total_length = total_length + after:len()
     end
     if total_length > max_length then
-      if before ~= nil then
-        line = "%#tabline_b_to_c#" .. M.options.section_right .. "%#tabline_b_normal#" .. "..." .. line
-      end
-      if after ~= nil and i == 1 then
-        line = line .. "%#tabline_b_to_a#" .. M.options.section_right .. "%#tabline_b_normal#" .. "..."
-      elseif after ~= nil then
-        line = line .. "%#tabline_a_to_b#" .. M.options.component_right .. "%#tabline_b_normal#" .. "..."
-      end
+      break
+    end
+    if before then
+      line = before:render() .. line
+    end
+    if after then
+      line = line .. after:render()
     end
   end
+
+  if total_length > max_length then
+    if before ~= nil then
+      line = "%#tabline_b_to_c#" .. M.options.section_right .. "%#tabline_b_normal#" .. "..." .. line
+    end
+    if after ~= nil and i == 1 then
+      line = line .. "%#tabline_b_to_a#" .. M.options.section_right .. "%#tabline_b_normal#" .. "..."
+    elseif after ~= nil then
+      line = line .. "%#tabline_a_to_b#" .. M.options.component_right .. "%#tabline_b_normal#" .. "..."
+    end
+  end
+
   M.total_tab_length = total_length
   if M.options.show_tabs_always then
     line = "%=%#TabLineFill#%999X" .. line
@@ -466,20 +453,18 @@ function M.format_buffers(buffers, max_length)
 end
 
 function M._current_tab(tab)
-  local data = vim.fn.json_decode(vim.g.tabline_tab_data)
   if tab == nil then
-    return data[vim.fn.tabpagenr()]
+    return vim.t.tabline_data
   else
-    data[vim.fn.tabpagenr()] = tab
-    vim.g.tabline_tab_data = vim.fn.json_encode(data)
+    vim.t.tabline_data = tab
   end
 end
 
 function M.clear_bind_buffers()
-  local data = vim.fn.json_decode(vim.g.tabline_tab_data)
-  data[vim.fn.tabpagenr()].allowed_buffers = {}
-  data[vim.fn.tabpagenr()].show_all_buffers = true
-  vim.g.tabline_tab_data = vim.fn.json_encode(data)
+  local data = vim.t.tabline_data
+  data.allowed_buffers = {}
+  data.show_all_buffers = true
+  vim.t.tabline_data = data
   vim.cmd([[redrawtabline]])
 end
 
@@ -497,10 +482,10 @@ function M._bind_buffers(args)
       filelist[#filelist + 1] = vim.fn.fnamemodify(vim.fn.expand(buffer_name), ":p:~")
     end
   end
-  local data = vim.fn.json_decode(vim.g.tabline_tab_data)
-  data[vim.fn.tabpagenr()].allowed_buffers = filelist
-  data[vim.fn.tabpagenr()].show_all_buffers = false
-  vim.g.tabline_tab_data = vim.fn.json_encode(data)
+  local data = vim.t.tabline_data
+  data.allowed_buffers = filelist
+  data.show_all_buffers = false
+  vim.t.tabline_data = data
   vim.cmd([[redrawtabline]])
 end
 
@@ -692,14 +677,8 @@ end
 function M.initialize_tab_data(opt)
   local tabs = {}
   for t = 1, vim.fn.tabpagenr("$") do
-    tabs[#tabs + 1] = Tab:new({ tabnr = t, options = opt })
+    tabs[t] = Tab:new({ tabnr = t, options = opt })
   end
-  local old_data = vim.fn.json_decode(vim.g.tabline_tab_data)
-  local data = {}
-  for t = 1, vim.fn.tabpagenr("$") do
-    data[t] = old_data[t]
-  end
-  vim.g.tabline_tab_data = vim.fn.json_encode(data)
   return tabs
 end
 
@@ -805,7 +784,6 @@ end
 
 function M.setup(opts)
   vim.cmd([[
-    let g:tabline_tab_data = get(g:, "tabline_tab_data", '{}')
     let g:tabline_show_devicons = get(g:, "tabline_show_devicons", v:true)
     let g:tabline_show_bufnr = get(g:, "tabline_show_bufnr", v:false)
     let g:tabline_show_filename_only = get(g:, "tabline_show_filename_only", v:false)
