@@ -109,7 +109,19 @@ function M._new_tab_data(tabnr)
     tabnr = vim.fn.tabpagenr()
   end
   if vim.fn.gettabvar(tabnr, 'tabline_data') == "" then
-    vim.fn.settabvar(tabnr, 'tabline_data', { name = tabnr .. "", show_all_buffers = true, allowed_buffers = {} })
+    -- Make sure new tab has uniqe name
+    local min = tabnr
+    for i = 1, vim.fn.tabpagenr("$") do
+      local x = vim.fn.gettabvar(i, "tabline_data")
+      if x then
+        local y = tonumber(x.name)
+        if y and min <= y then
+          min = y+1
+        end
+      end
+    end
+
+    vim.fn.settabvar(tabnr, 'tabline_data', { name = min .. "", show_all_buffers = true, allowed_buffers = {} })
   end
 end
 
