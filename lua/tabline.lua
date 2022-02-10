@@ -711,10 +711,31 @@ function M.tabline_tabs(opt)
     end
   end
   line = M.format_tabs(tabs)
+  M.store_session_data()
   return line
   -- local line = '%=%#TabLineFill#%999X' .. '%#tabline_a_to_c#' .. opt.section_right .. '%#tabline_a_normal#' .. ' '
   --                  .. vim.fn.tabpagenr() .. '/' .. vim.fn.tabpagenr('$') .. ' '
   -- return line
+end
+
+function M.store_session_data()
+  local data = {}
+  for i = 1, vim.fn.tabpagenr("$") do
+    data[i] = vim.fn.gettabvar(i, "tabline_data")
+  end
+  vim.g.Tabline_session_data = vim.fn.json_encode(data)
+end
+
+function M.on_session_load_post()
+  if vim.g.Tabline_session_data == nil then
+    return
+  end
+  local data = vim.fn.json_decode(vim.g.Tabline_session_data)
+  for v, k in ipairs(data) do
+    vim.fn.settabvar(v, "tabline_data", k)
+  end
+  vim.cmd([[redrawstatus]])
+  vim.cmd([[redrawtabline]])
 end
 
 function M.highlight_groups()
@@ -921,6 +942,9 @@ function M.setup(opts)
     command! -nargs=1 TablineTabRename lua require('tabline').tab_rename(<f-args>)
 
     command! TablineToggleShowAllBuffers lua require('tabline').toggle_show_all_buffers()
+
+    autocmd SessionLoadPost * lua require'tabline'.on_session_load_post()
+
   ]])
 
   function _G.tabline_buffers_tabs()
