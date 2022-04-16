@@ -628,6 +628,49 @@ function M.tabline_buffers(opt)
   return line
 end
 
+function M.tabline_buffers_tabs_only(opt)
+  opt = M.options
+
+  M.highlight_groups()
+
+  local tabs = M.initialize_tab_data(opt)
+  local buffers = {}
+  M.buffers = buffers
+
+  for b = 1, #tabs do
+    local bufnr = vim.fn.tabpagebuflist(tonumber(tabs[b]["name"]))[1]
+    local buffer = Buffer:new({ bufnr = bufnr, options = opt })
+    if buffer.buftype ~= "quickfix" then
+      buffers[#buffers + 1] = buffer
+    end
+  end
+
+  local line = ""
+  local current = 0
+  for i, buffer in pairs(buffers) do
+    if i == 1 then
+      buffer.first = true
+    end
+    if i == #buffers and not M.options.show_last_separator then
+      buffer.last = true
+    end
+    if buffer.bufnr == vim.fn.bufnr() then
+      buffer.current = true
+      current = i
+    end
+  end
+  for i, buffer in pairs(buffers) do
+    if i == current - 1 then
+      buffer.beforecurrent = true
+    end
+    if i == current + 1 then
+      buffer.aftercurrent = true
+    end
+  end
+  line = M.format_buffers(buffers, M.options.max_bufferline_percent)
+  return line
+end
+
 function Buffer:hl()
   if self.current and self.modified and M.options.modified_italic then
     return "%#tabline_a_normal_italic#"
@@ -768,6 +811,7 @@ function M.setup(opts)
     let g:tabline_show_tabs_always = get(g:, "tabline_show_tabs_always", v:false)
     let g:tabline_modified_icon = get(g:, "tabline_modified_icon", " ")
     let g:tabline_modified_italic = get(g:, "tabline_modified_italic", v:true)
+    let g:tabline_show_tabs_only = get(g:, "tabline_show_tabs_only", v:false)
   ]])
 
   if opts == nil then
@@ -861,6 +905,11 @@ function M.setup(opts)
     M.options.modified_italic = vim.g.tabline_modified_italic
   end
 
+  if opts.options.show_tabs_only then
+    M.options.show_tabs_only = opts.options.show_tabs_only
+  else
+    M.options.show_tabs_only = vim.g.tabline_show_tabs_only
+  end
 
   vim.cmd([[
 
@@ -893,6 +942,9 @@ function M.setup(opts)
   ]])
 
   function _G.tabline_buffers_tabs()
+    if M.options.show_tabs_only then
+      return M.tabline_buffers_tabs_only(M.options)
+    end
     local tabs = M.tabline_tabs(M.options)
     return M.tabline_buffers(M.options) .. tabs
   end

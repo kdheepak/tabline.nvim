@@ -36,6 +36,7 @@ use {
         show_filename_only = false, -- shows base filename only instead of relative path in filename
         modified_icon = "+ ", -- change the default modified icon
         modified_italic = false, -- set to true by default; this determines whether the filename turns italic if modified
+        show_tabs_only = false, -- this shows only tabs instead of tabs + buffers
       }
     }
     vim.cmd[[
@@ -96,6 +97,10 @@ Show only filename instead of shortened full path (default = false)
 ### tabline_show_last_separator
 
 Show separator after the last buffer or tab (default = false)
+
+### tabline_show_tabs_only
+
+Show only tabs instead of tabs + buffers (default = false)
 
 # Lualine tabline support
 
