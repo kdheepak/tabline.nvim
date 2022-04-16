@@ -1,4 +1,4 @@
-*tabline.txt*          For NVIM v0.4.3          Last change: 2021 September 08
+*tabline.txt*            For NVIM v0.5.0            Last change: 2022 April 16
 
 ==============================================================================
 Table of Contents                                  *tabline-table-of-contents*
@@ -48,7 +48,13 @@ A "buffer and tab" tabline:
             section_separators = {'', ''},
             component_separators = {'', ''},
             max_bufferline_percent = 66, -- set to nil by default, and it uses vim.o.columns * 2/3
-            always_show_tabs = false, -- by default, this shows tabs only when there are more than one tab or if the first tab is named
+            show_tabs_always = false, -- this shows tabs only when there are more than one tab or if the first tab is named
+            show_devicons = true, -- this shows devicons in buffer section
+            show_bufnr = false, -- this appends [bufnr] to buffer section,
+            show_filename_only = false, -- shows base filename only instead of relative path in filename
+            modified_icon = "+ ", -- change the default modified icon
+            modified_italic = false, -- set to true by default; this determines whether the filename turns italic if modified
+            show_tabs_only = false, -- this shows only tabs instead of tabs + buffers
           }
         }
         vim.cmd[[
@@ -64,32 +70,32 @@ A "buffer and tab" tabline:
 ==============================================================================
 3. Usage                                                       *tabline-usage*
 
-:TABLINEBUFFERNEXT
+:TABLINEBUFFERNEXT ~
 
 Move to next buffer in the tabline.
 
-:TABLINEBUFFERPREVIOUS
+:TABLINEBUFFERPREVIOUS ~
 
 Move to previous buffer in the tabline.
 
-:TABLINETABNEW {FILENAME1.EXT} {FILENAME2.EXT}
+:TABLINETABNEW {FILENAME1.EXT} {FILENAME2.EXT} ~
 
 Open a new tab with these files.
 
-:TABLINETOGGLESHOWALLBUFFERS
+:TABLINETOGGLESHOWALLBUFFERS ~
 
 Toggles whether to show all buffers that are open versus only buffers that are
 currently visible or bound.
 
-:TABLINEBUFFERSBIND {FILENAME1.EXT} {FILENAME2.EXT}
+:TABLINEBUFFERSBIND {FILENAME1.EXT} {FILENAME2.EXT} ~
 
 Bind the current tab’s buffers to these files.
 
-:TABLINEBUFFERSCLEARBIND
+:TABLINEBUFFERSCLEARBIND ~
 
 Clear the binding of current tab’s buffers.
 
-:TABLINETABRENAME {NAME}
+:TABLINETABRENAME {NAME} ~
 
 Rename current tab’s name.
 
@@ -99,23 +105,36 @@ Rename current tab’s name.
 You can customize the behavior of this extension by setting values for any of
 the following optional parameters.
 
-TABLINE_SHOW_DEVICONS
+TABLINE_SHOW_DEVICONS ~
 
 Show devicons in tabline for each buffer (default = true)
 
-TABLINE_SHOW_BUFNR
+TABLINE_SHOW_BUFNR ~
 
 Show bufnr in tabline for each buffer (default = false)
 
-TABLINE_SHOW_FILENAME_ONLY
+TABLINE_SHOW_FILENAME_ONLY ~
 
 Show only filename instead of shortened full path (default = false)
+
+TABLINE_SHOW_LAST_SEPARATOR ~
+
+Show separator after the last buffer or tab (default = false)
+
+TABLINE_SHOW_TABS_ONLY ~
+
+Show only tabs instead of tabs + buffers (default = false)
 
 ==============================================================================
 5. Lualine tabline support                   *tabline-lualine-tabline-support*
 
-If you’d like to use tabline with lualine’s tabline instead, you can do the
-following:
+`nvim-lualine/lualine.nvim` <https://github.com/nvim-lualine/lualine.nvim> now
+has buffers and tabs as components. If you are not interested in binding
+buffers to tabs, I’d recommend using those components. They work well in any
+section.
+
+If you’d still like to use tabline with lualine’s tabline instead, you can
+do the following:
 
 >
     use {
