@@ -951,11 +951,7 @@ function M.setup(opts)
 
   if opts.enable then
     vim.o.tabline = "%!v:lua.tabline_buffers_tabs()"
-    if M.options.show_tabs_always then
-      vim.o.showtabline = 2
-    else
-      vim.o.showtabline = 1
-    end
+    vim.o.showtabline = 2
   end
 end
 
