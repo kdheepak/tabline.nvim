@@ -863,31 +863,33 @@ function M.setup(opts)
     end
   end
 
-  if opts.options.always_show_tabs or opts.options.show_tabs_always then
-    M.options.show_tabs_always = opts.options.show_tabs_always or opts.options.always_show_tabs
+  if opts.options.always_show_tabs ~= nil then
+    M.options.show_tabs_always = opts.options.always_show_tabs
+  elseif opts.options.show_tabs_always ~= nil then
+    M.options.show_tabs_always = opts.options.show_tabs_always
   else
     M.options.show_tabs_always = vim.g.tabline_show_tabs_always
   end
 
-  if opts.options.show_bufnr then
+  if opts.options.show_bufnr ~= nil then
     M.options.show_bufnr = opts.options.show_bufnr
   else
     M.options.show_bufnr = vim.g.tabline_show_bufnr
   end
 
-  if opts.options.show_devicons then
+  if opts.options.show_devicons ~= nil then
     M.options.show_devicons = opts.options.show_devicons
   else
     M.options.show_devicons = vim.g.tabline_show_devicons
   end
 
-  if opts.options.show_filename_only then
+  if opts.options.show_filename_only ~= nil then
     M.options.show_filename_only = opts.options.show_filename_only
   else
     M.options.show_filename_only = vim.g.tabline_show_filename_only
   end
 
-  if opts.options.show_last_separator then
+  if opts.options.show_last_separator ~= nil then
     M.options.show_last_separator = opts.options.show_last_separator
   else
     M.options.show_last_separator = vim.g.tabline_show_last_separator
@@ -899,13 +901,13 @@ function M.setup(opts)
     M.options.modified_icon = vim.g.tabline_modified_icon
   end
 
-  if opts.options.modified_italic == false then
+  if opts.options.modified_italic ~= nil then
     M.options.modified_italic = opts.options.modified_italic
   else
     M.options.modified_italic = vim.g.tabline_modified_italic
   end
 
-  if opts.options.show_tabs_only then
+  if opts.options.show_tabs_only ~= nil then
     M.options.show_tabs_only = opts.options.show_tabs_only
   else
     M.options.show_tabs_only = vim.g.tabline_show_tabs_only
