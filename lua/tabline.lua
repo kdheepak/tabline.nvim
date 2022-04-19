@@ -293,7 +293,7 @@ function Buffer:get_props()
   local dev, devhl
   local status, _ = pcall(require, "nvim-web-devicons")
   if not status then
-    dev, devhl = "", ""
+    dev, devhl = nil, nil
   elseif self.filetype == "TelescopePrompt" then
     dev, devhl = require("nvim-web-devicons").get_icon("telescope")
   elseif self.filetype == "fugitive" then
@@ -309,8 +309,6 @@ function Buffer:get_props()
   end
   if dev and M.options.show_devicons then
     self.icon = dev
-  else
-    self.icon = ""
   end
   self.name = self:name()
   return self
@@ -365,8 +363,12 @@ function Buffer:render()
     .. "%"
     .. self.bufnr
     .. "@TablineSwitchBuffer@"
+  if self.icon then
+    line = line
     .. " "
     .. self.icon
+  end
+  line = line
     .. " "
     .. self.name
     .. " "
