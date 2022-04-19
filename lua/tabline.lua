@@ -16,12 +16,12 @@ M.total_tab_length = 6
 ---@param color string|number
 ---@return string
 local function sanitize_color(color)
-  if type(color) == 'string' then
-    if color:sub(1, 1) == '#' then
+  if type(color) == "string" then
+    if color:sub(1, 1) == "#" then
       return color
     end -- RGB value
     return modules.color_utils.color_name2rgb(color)
-  elseif type(color) == 'number' then
+  elseif type(color) == "number" then
     if color > 255 then
       error("What's this it can't be higher then 255 and you've given " .. color)
     end
@@ -40,7 +40,7 @@ end
 -- https://github.com/alvarosevilla95/luatab.nvim
 
 function M.highlight(name, foreground, background, gui)
-  local color_utils = require "tabline.color_utils"
+  local color_utils = require("tabline.color_utils")
   local command = { "highlight", name }
   foreground = sanitize_color(foreground)
   background = sanitize_color(background)
@@ -255,7 +255,7 @@ function M.format_tabs(tabs, max_length)
     end
   end
   M.total_tab_length = total_length
-  if M.options.always_show_tabs then
+  if M.options.show_tabs_always then
     line = "%=%#TabLineFill#%999X" .. line
   elseif #tabs == 1 and tabs[1].name ~= "1 " then
     line = "%=%#TabLineFill#%999X" .. line
