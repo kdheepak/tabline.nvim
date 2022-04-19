@@ -863,8 +863,10 @@ function M.setup(opts)
     end
   end
 
-  if (opts.options.always_show_tabs or opts.options.show_tabs_always) ~= nil then
-    M.options.show_tabs_always = opts.options.show_tabs_always or opts.options.always_show_tabs
+  if opts.options.always_show_tabs ~= nil then
+    M.options.show_tabs_always = opts.options.always_show_tabs
+  elseif opts.options.show_tabs_always ~= nil then
+    M.options.show_tabs_always = opts.options.show_tabs_always
   else
     M.options.show_tabs_always = vim.g.tabline_show_tabs_always
   end
