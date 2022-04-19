@@ -808,7 +808,7 @@ function M.setup(opts)
     let g:tabline_show_bufnr = get(g:, "tabline_show_bufnr", v:false)
     let g:tabline_show_filename_only = get(g:, "tabline_show_filename_only", v:false)
     let g:tabline_show_last_separator = get(g:, "tabline_show_last_separator", v:false)
-    let g:tabline_show_tabs_always = get(g:, "tabline_show_tabs_always", v:false)
+    let g:tabline_show_tabs_always = get(g:, "tabline_show_tabs_always", v:true)
     let g:tabline_modified_icon = get(g:, "tabline_modified_icon", " ")
     let g:tabline_modified_italic = get(g:, "tabline_modified_italic", v:true)
     let g:tabline_show_tabs_only = get(g:, "tabline_show_tabs_only", v:false)
@@ -953,7 +953,11 @@ function M.setup(opts)
 
   if opts.enable then
     vim.o.tabline = "%!v:lua.tabline_buffers_tabs()"
-    vim.o.showtabline = 2
+    if M.options.show_tabs_always then
+      vim.o.showtabline = 2
+    else
+      vim.o.showtabline = 1
+    end
   end
 end
 
