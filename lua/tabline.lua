@@ -491,10 +491,10 @@ end
 function M._bind_buffers(args)
   local filelist = {}
   if #args == 0 then
-    filelist[#filelist + 1] = vim.fn.expand("%:p:~")
+    filelist[vim.fn.expand("%:p:~")] = true
   else
     for _, buffer_name in pairs(args) do
-      filelist[#filelist + 1] = vim.fn.fnamemodify(vim.fn.expand(buffer_name), ":p:~")
+      filelist[vim.fn.fnamemodify(vim.fn.expand(buffer_name), ":p:~")] = true
     end
   end
   local data = vim.fn.json_decode(vim.g.tabline_tab_data)
