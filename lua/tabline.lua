@@ -570,15 +570,6 @@ function M.fzf_bind_buffers()
   end)()
 end
 
-local function contains(list, x)
-  for i, v in pairs(list) do
-    if v == x then
-      return true
-    end
-  end
-  return false
-end
-
 function M.tabline_buffers(opt)
   opt = M.options
 
@@ -597,7 +588,7 @@ function M.tabline_buffers(opt)
         buffers[#buffers + 1] = buffer
       else
         local filepath = vim.fn.expand("#" .. buffer.bufnr .. ":p:~")
-        if current_tab and contains(current_tab.allowed_buffers, filepath) then
+        if current_tab and current_tab.allowed_buffers[filepath] then
           buffers[#buffers + 1] = buffer
         end
       end
