@@ -255,11 +255,11 @@ function M.format_tabs(tabs, max_length)
     end
   end
   M.total_tab_length = total_length
-  if M.options.show_tabs_always then
+  if M.options.show_tabline_tabs == 2 then
     line = "%=%#TabLineFill#%999X" .. line
-  elseif #tabs == 1 and tabs[1].name ~= "1 " then
+  elseif M.options.show_tabline_tabs == 1 and #tabs == 1 and tabs[1].name ~= "1 " then
     line = "%=%#TabLineFill#%999X" .. line
-  elseif #tabs > 1 then
+  elseif M.options.show_tabline_tabs == 1 and #tabs > 1 then
     line = "%=%#TabLineFill#%999X" .. line
   else
     line = "%=%#TabLineFill#%999X"
@@ -462,6 +462,13 @@ function M.format_buffers(buffers, max_length)
       end
     end
   end
+
+  if M.options.show_tabline_buffers == 1 and #buffers == 1 then
+    line = "%#tabline_c_normal#"
+  elseif M.options.show_tabline_buffers == 0 then
+    line = "%#tabline_c_normal#"
+  end
+
   return line
 end
 
@@ -803,6 +810,18 @@ function M.buffer_previous()
   end
 end
 
+function M.tabline_visibility()
+  if M.options.show_tabline_buffers == 2 or M.options.show_tabline_tabs == 2 then
+    return 2
+  elseif M.options.show_tabline_buffers == 0 and M.options.show_tabline_tabs == 0 then
+    return 0
+  elseif M.tabline_buffers(M.options) == "%#tabline_c_normal#" then
+    return 0
+  else
+    return 2
+  end
+end
+
 function M.setup(opts)
   vim.cmd([[
     let g:tabline_tab_data = get(g:, "tabline_tab_data", '{}')
@@ -810,10 +829,11 @@ function M.setup(opts)
     let g:tabline_show_bufnr = get(g:, "tabline_show_bufnr", v:false)
     let g:tabline_show_filename_only = get(g:, "tabline_show_filename_only", v:false)
     let g:tabline_show_last_separator = get(g:, "tabline_show_last_separator", v:false)
-    let g:tabline_show_tabs_always = get(g:, "tabline_show_tabs_always", v:false)
     let g:tabline_modified_icon = get(g:, "tabline_modified_icon", " ")
     let g:tabline_modified_italic = get(g:, "tabline_modified_italic", v:true)
     let g:tabline_show_tabs_only = get(g:, "tabline_show_tabs_only", v:false)
+    let g:tabline_show_tabline_buffers = get(g:, "tabline_show_tabline_buffers", 2)
+    let g:tabline_show_tabline_tabs = get(g:, "tabline_show_tabline_tabs", 1)
   ]])
 
   if opts == nil then
@@ -865,12 +885,16 @@ function M.setup(opts)
     end
   end
 
-  if opts.options.always_show_tabs ~= nil then
-    M.options.show_tabs_always = opts.options.always_show_tabs
-  elseif opts.options.show_tabs_always ~= nil then
-    M.options.show_tabs_always = opts.options.show_tabs_always
+  if opts.options.show_tabline_tabs ~= nil then
+    M.options.show_tabline_tabs = opts.options.show_tabline_tabs
   else
-    M.options.show_tabs_always = vim.g.tabline_show_tabs_always
+    M.options.show_tabline_tabs = vim.g.tabline_show_tabline_tabs
+  end
+
+  if opts.options.show_tabline_buffers ~= nil then
+    M.options.show_tabline_buffers= opts.options.show_tabline_buffers
+  else
+    M.options.show_tabline_buffers= vim.g.tabline_show_tabline_buffers
   end
 
   if opts.options.show_bufnr ~= nil then
@@ -946,16 +970,22 @@ function M.setup(opts)
   ]])
 
   function _G.tabline_buffers_tabs()
-    if M.options.show_tabs_only then
-      return M.tabline_buffers_tabs_only(M.options)
-    end
+    local buffers
     local tabs = M.tabline_tabs(M.options)
-    return M.tabline_buffers(M.options) .. tabs
+    if M.options.show_tabs_only then
+      buffers = M.tabline_buffers_tabs_only(M.options)
+    else
+      buffers = M.tabline_buffers(M.options)
+    end
+
+    return buffers .. tabs
   end
 
   if opts.enable then
     vim.o.tabline = "%!v:lua.tabline_buffers_tabs()"
     vim.o.showtabline = 2
+    -- Cannot get this to work
+    --vim.o.showtabline = M.tabline_visibility()
   end
 end
 
