@@ -810,18 +810,6 @@ function M.buffer_previous()
   end
 end
 
-function M.tabline_visibility()
-  if M.options.show_tabline_buffers == 2 or M.options.show_tabline_tabs == 2 then
-    return 2
-  elseif M.options.show_tabline_buffers == 0 and M.options.show_tabline_tabs == 0 then
-    return 0
-  elseif M.tabline_buffers(M.options) == "%#tabline_c_normal#" then
-    return 0
-  else
-    return 2
-  end
-end
-
 function M.setup(opts)
   vim.cmd([[
     let g:tabline_tab_data = get(g:, "tabline_tab_data", '{}')
@@ -981,11 +969,27 @@ function M.setup(opts)
     return buffers .. tabs
   end
 
+  -- works for everything except BufDelete
+  function _G.update_tabline_visibility()
+    local v
+    if M.options.show_tabline_buffers == 2 or M.options.show_tabline_tabs == 2 then -- at least one component is always shown
+      v = 2
+    elseif M.options.show_tabline_buffers == 0 and M.options.show_tabline_tabs == 0 then -- no component is shown
+      v = 0
+    elseif tabline_buffers_tabs() == "%#tabline_c_normal#%=%#TabLineFill#%999X" then -- show_tabline_buffers, show_tabline_tabs <= 1 and there is at most one buffer in only one tab
+      v = 0
+    else
+      v = 2
+    end
+
+    vim.o.showtabline = v
+  end
+
   if opts.enable then
     vim.o.tabline = "%!v:lua.tabline_buffers_tabs()"
-    vim.o.showtabline = 2
-    -- Cannot get this to work
-    --vim.o.showtabline = M.tabline_visibility()
+    vim.cmd([[
+      autocmd BufAdd,BufDelete,TabNew,TabClosed * call v:lua.update_tabline_visibility()
+    ]])
   end
 end
 
