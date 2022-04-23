@@ -969,17 +969,27 @@ function M.setup(opts)
     return buffers .. tabs
   end
 
-  -- works for everything except BufDelete
-  function _G.update_tabline_visibility()
+  -- to_delete: the count of buffers to be deleted after this call
+  function _G.update_tabline_visibility(to_delete)
+    local tab_count = vim.fn.tabpagenr('$')
+    local buf_count = -to_delete
+    for b = 1, vim.fn.bufnr('$') do
+      -- this should be a function (same tests repeated for 4 times...)
+      if vim.fn.buflisted(b) ~= 0 and vim.fn.getbufvar(b, "&buftype") ~= "quickfix" then
+        buf_count = buf_count + 1
+      end
+    end
+
+    local function is_shown(opt, count)
+      return opt == 2 or (opt == 1 and count > 1)
+    end
+
     local v
-    if M.options.show_tabline_buffers == 2 or M.options.show_tabline_tabs == 2 then -- at least one component is always shown
+    if is_shown(M.options.show_tabline_buffers, buf_count)
+       or is_shown(M.options.show_tabline_tabs, tab_count) then
       v = 2
-    elseif M.options.show_tabline_buffers == 0 and M.options.show_tabline_tabs == 0 then -- no component is shown
-      v = 0
-    elseif tabline_buffers_tabs() == "%#tabline_c_normal#%=%#TabLineFill#%999X" then -- show_tabline_buffers, show_tabline_tabs <= 1 and there is at most one buffer in only one tab
-      v = 0
     else
-      v = 2
+      v = 0
     end
 
     vim.o.showtabline = v
@@ -987,8 +997,13 @@ function M.setup(opts)
 
   if opts.enable then
     vim.o.tabline = "%!v:lua.tabline_buffers_tabs()"
+    update_tabline_visibility(0)
     vim.cmd([[
-      autocmd BufAdd,BufDelete,TabNew,TabClosed * call v:lua.update_tabline_visibility()
+      augroup TablineUpdateVisibility
+        autocmd!
+        autocmd BufAdd,TabNew,TabClosed * call v:lua.update_tabline_visibility(0)
+        autocmd BufDelete * call v:lua.update_tabline_visibility(1)
+      augroup END
     ]])
   end
 end
