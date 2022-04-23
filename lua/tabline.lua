@@ -972,12 +972,17 @@ function M.setup(opts)
   -- to_delete: the count of buffers to be deleted after this call
   function _G.update_tabline_visibility(to_delete)
     local tab_count = vim.fn.tabpagenr('$')
-    local buf_count = -to_delete
-    for b = 1, vim.fn.bufnr('$') do
-      -- this should be a function (same tests repeated for 4 times...)
-      if vim.fn.buflisted(b) ~= 0 and vim.fn.getbufvar(b, "&buftype") ~= "quickfix" then
-        buf_count = buf_count + 1
+    local buf_count
+    if M.options.show_tabs_only == false then
+      buf_count = -to_delete
+      for b = 1, vim.fn.bufnr('$') do
+        -- this should be a function (same tests repeated for 4 times...)
+        if vim.fn.buflisted(b) ~= 0 and vim.fn.getbufvar(b, "&buftype") ~= "quickfix" then
+          buf_count = buf_count + 1
+        end
       end
+    else
+      buf_count = tab_count
     end
 
     local function is_shown(opt, count)
