@@ -16,16 +16,17 @@ M.total_tab_length = 6
 ---@param color string|number
 ---@return string
 local function sanitize_color(color)
+  local color_utils = require("tabline.color_utils")
   if type(color) == "string" then
     if color:sub(1, 1) == "#" then
       return color
     end -- RGB value
-    return modules.color_utils.color_name2rgb(color)
+    return color_utils.color_name2rgb(color)
   elseif type(color) == "number" then
     if color > 255 then
       error("What's this it can't be higher then 255 and you've given " .. color)
     end
-    return modules.color_utils.cterm2rgb(color)
+    return color_utils.cterm2rgb(color)
   end
 end
 
@@ -116,7 +117,7 @@ function M._new_tab_data(tabnr)
       if x then
         local y = tonumber(x.name)
         if y and min <= y then
-          min = y+1
+          min = y + 1
         end
       end
     end
@@ -211,7 +212,7 @@ function M.format_tabs(tabs, max_length)
   local total_length = 0
   local current = vim.fn.tabpagenr()
   local current_tab = tabs[current]
-  assert(not(current_tab == nil))
+  assert(not (current_tab == nil))
   current_tab.current = 1
 
   line = line .. current_tab:render()
@@ -359,19 +360,19 @@ end
 
 function Buffer:render()
   local line = self:hl()
-    .. "%"
-    .. self.bufnr
-    .. "@TablineSwitchBuffer@"
+      .. "%"
+      .. self.bufnr
+      .. "@TablineSwitchBuffer@"
   if self.icon then
     line = line
-    .. " "
-    .. self.icon
+        .. " "
+        .. self.icon
   end
   line = line
-    .. " "
-    .. self.name
-    .. " "
-    .. self.modified_icon
+      .. " "
+      .. self.name
+      .. " "
+      .. self.modified_icon
   if M.options.show_bufnr then
     line = line .. "[" .. self.bufnr .. "] "
   end
@@ -547,8 +548,8 @@ function M.fzf_bind_buffers()
     local choices = fzf(
       buffers,
       "--layout=reverse --bind='f2:toggle-preview,f3:toggle-preview-wrap,shift-down:preview-page-down,shift-up:preview-page-up,ctrl-d:half-page-down,ctrl-u:half-page-up,ctrl-f:page-down,ctrl-b:page-up,ctrl-a:toggle-all,ctrl-l:clear-query' --prompt='Buffers> ' --preview-window='nohidden:border:nowrap:right:60%' --preview="
-        .. shell
-        .. " --height=100% --ansi --info=inline --expect=ctrl-s,ctrl-v,ctrl-x,ctrl-t --multi"
+      .. shell
+      .. " --height=100% --ansi --info=inline --expect=ctrl-s,ctrl-v,ctrl-x,ctrl-t --multi"
     )
     if not choices then
       return
