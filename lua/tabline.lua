@@ -16,23 +16,24 @@ M.total_tab_length = 6
 ---@param color string|number
 ---@return string
 local function sanitize_color(color)
+  local color_utils = require("tabline.color_utils")
   if type(color) == "string" then
     if color:sub(1, 1) == "#" then
       return color
     end -- RGB value
-    return modules.color_utils.color_name2rgb(color)
+    return color_utils.color_name2rgb(color)
   elseif type(color) == "number" then
     if color > 255 then
       error("What's this it can't be higher then 255 and you've given " .. color)
     end
-    return modules.color_utils.cterm2rgb(color)
+    return color_utils.cterm2rgb(color)
   end
 end
 
 function M.toggle_show_all_buffers()
-  local data = vim.fn.json_decode(vim.g.tabline_tab_data)
-  data[vim.fn.tabpagenr()].show_all_buffers = not data[vim.fn.tabpagenr()].show_all_buffers
-  vim.g.tabline_tab_data = vim.fn.json_encode(data)
+  local data = vim.t.tabline_data
+  data.show_all_buffers = not data.show_all_buffers
+  vim.t.tabline_data = data
   vim.cmd([[redrawtabline]])
 end
 
@@ -104,36 +105,42 @@ function Tab:new(tab)
   return newObj
 end
 
-function M._new_tab_data(tabnr, data)
-  if data == nil then
-    data = vim.fn.json_decode(vim.g.tabline_tab_data)
-  end
+function M._new_tab_data(tabnr)
   if tabnr == nil then
     tabnr = vim.fn.tabpagenr()
   end
-  if data[tabnr] == nil then
-    data[tabnr] = { name = tabnr .. "", show_all_buffers = true, allowed_buffers = {} }
+  if vim.fn.gettabvar(tabnr, 'tabline_data') == "" then
+    -- Make sure new tab has uniqe name
+    local min = tabnr
+    for i = 1, vim.fn.tabpagenr("$") do
+      local x = vim.fn.gettabvar(i, "tabline_data")
+      if x then
+        local y = tonumber(x.name)
+        if y and min <= y then
+          min = y + 1
+        end
+      end
+    end
+
+    vim.fn.settabvar(tabnr, 'tabline_data', { name = min .. "", show_all_buffers = true, allowed_buffers = {} })
   end
-  vim.g.tabline_tab_data = vim.fn.json_encode(data)
 end
 
 function Tab:get_props()
-  local data
-  data = vim.fn.json_decode(vim.g.tabline_tab_data)
-  if data[self.tabnr] == nil then
-    self.name = self.tabnr
-    M._new_tab_data(self.tabnr)
+  M._new_tab_data(self.tabnr)
+  local data = vim.fn.gettabvar(self.tabnr, 'tabline_data')
+  for k, i in pairs(data) do
+    self[k] = i
   end
-  data = vim.fn.json_decode(vim.g.tabline_tab_data)
-  self.name = data[self.tabnr].name .. " "
+  self.name = self.name .. " "
   return self
 end
 
 function M.tab_rename(name)
-  local data = vim.fn.json_decode(vim.g.tabline_tab_data)
   M._new_tab_data()
-  data[vim.fn.tabpagenr()].name = name
-  vim.g.tabline_tab_data = vim.fn.json_encode(data)
+  local data = vim.t.tabline_data
+  data.name = name
+  vim.t.tabline_data = data
   vim.cmd([[redrawtabline]])
 end
 
@@ -200,60 +207,53 @@ function M.format_tabs(tabs, max_length)
   if max_length == nil then
     max_length = math.floor(vim.o.columns / 3)
   end
+
   local line = ""
   local total_length = 0
-  local current
-  for i, tab in pairs(tabs) do
-    if tab.current then
-      current = i
-    end
-  end
+  local current = vim.fn.tabpagenr()
   local current_tab = tabs[current]
-  if current_tab == nil then
-    local t = Tab:new({ tabnr = vim.fn.tabpagenr() })
-    t.current = true
-    t.last = true
-    total_length = t:len()
-    line = t:render()
-  else
-    line = line .. current_tab:render()
-    total_length = current_tab:len()
-    local i = 0
-    local before, after
-    while true do
-      i = i + 1
-      before = tabs[current - i]
-      after = tabs[current + i]
-      if before == nil and after == nil then
-        break
-      end
-      if before then
-        total_length = total_length + before:len()
-      end
-      if after then
-        total_length = total_length + after:len()
-      end
-      if total_length > max_length then
-        break
-      end
-      if before then
-        line = before:render() .. line
-      end
-      if after then
-        line = line .. after:render()
-      end
+  assert(not (current_tab == nil))
+  current_tab.current = 1
+
+  line = line .. current_tab:render()
+  total_length = current_tab:len()
+  local i = 0
+  local before, after
+  while true do
+    i = i + 1
+    before = tabs[current - i]
+    after = tabs[current + i]
+    if before == nil and after == nil then
+      break
+    end
+    if before then
+      total_length = total_length + before:len()
+    end
+    if after then
+      total_length = total_length + after:len()
     end
     if total_length > max_length then
-      if before ~= nil then
-        line = "%#tabline_b_to_c#" .. M.options.section_right .. "%#tabline_b_normal#" .. "..." .. line
-      end
-      if after ~= nil and i == 1 then
-        line = line .. "%#tabline_b_to_a#" .. M.options.section_right .. "%#tabline_b_normal#" .. "..."
-      elseif after ~= nil then
-        line = line .. "%#tabline_a_to_b#" .. M.options.component_right .. "%#tabline_b_normal#" .. "..."
-      end
+      break
+    end
+    if before then
+      line = before:render() .. line
+    end
+    if after then
+      line = line .. after:render()
     end
   end
+
+  if total_length > max_length then
+    if before ~= nil then
+      line = "%#tabline_b_to_c#" .. M.options.section_right .. "%#tabline_b_normal#" .. "..." .. line
+    end
+    if after ~= nil and i == 1 then
+      line = line .. "%#tabline_b_to_a#" .. M.options.section_right .. "%#tabline_b_normal#" .. "..."
+    elseif after ~= nil then
+      line = line .. "%#tabline_a_to_b#" .. M.options.component_right .. "%#tabline_b_normal#" .. "..."
+    end
+  end
+
   M.total_tab_length = total_length
   if M.options.show_tabs_always then
     line = "%=%#TabLineFill#%999X" .. line
@@ -360,19 +360,19 @@ end
 
 function Buffer:render()
   local line = self:hl()
-    .. "%"
-    .. self.bufnr
-    .. "@TablineSwitchBuffer@"
+      .. "%"
+      .. self.bufnr
+      .. "@TablineSwitchBuffer@"
   if self.icon then
     line = line
-    .. " "
-    .. self.icon
+        .. " "
+        .. self.icon
   end
   line = line
-    .. " "
-    .. self.name
-    .. " "
-    .. self.modified_icon
+      .. " "
+      .. self.name
+      .. " "
+      .. self.modified_icon
   if M.options.show_bufnr then
     line = line .. "[" .. self.bufnr .. "] "
   end
@@ -466,20 +466,18 @@ function M.format_buffers(buffers, max_length)
 end
 
 function M._current_tab(tab)
-  local data = vim.fn.json_decode(vim.g.tabline_tab_data)
   if tab == nil then
-    return data[vim.fn.tabpagenr()]
+    return vim.t.tabline_data
   else
-    data[vim.fn.tabpagenr()] = tab
-    vim.g.tabline_tab_data = vim.fn.json_encode(data)
+    vim.t.tabline_data = tab
   end
 end
 
 function M.clear_bind_buffers()
-  local data = vim.fn.json_decode(vim.g.tabline_tab_data)
-  data[vim.fn.tabpagenr()].allowed_buffers = {}
-  data[vim.fn.tabpagenr()].show_all_buffers = true
-  vim.g.tabline_tab_data = vim.fn.json_encode(data)
+  local data = vim.t.tabline_data
+  data.allowed_buffers = {}
+  data.show_all_buffers = true
+  vim.t.tabline_data = data
   vim.cmd([[redrawtabline]])
 end
 
@@ -497,10 +495,10 @@ function M._bind_buffers(args)
       filelist[#filelist + 1] = vim.fn.fnamemodify(vim.fn.expand(buffer_name), ":p:~")
     end
   end
-  local data = vim.fn.json_decode(vim.g.tabline_tab_data)
-  data[vim.fn.tabpagenr()].allowed_buffers = filelist
-  data[vim.fn.tabpagenr()].show_all_buffers = false
-  vim.g.tabline_tab_data = vim.fn.json_encode(data)
+  local data = vim.t.tabline_data
+  data.allowed_buffers = filelist
+  data.show_all_buffers = false
+  vim.t.tabline_data = data
   vim.cmd([[redrawtabline]])
 end
 
@@ -550,8 +548,8 @@ function M.fzf_bind_buffers()
     local choices = fzf(
       buffers,
       "--layout=reverse --bind='f2:toggle-preview,f3:toggle-preview-wrap,shift-down:preview-page-down,shift-up:preview-page-up,ctrl-d:half-page-down,ctrl-u:half-page-up,ctrl-f:page-down,ctrl-b:page-up,ctrl-a:toggle-all,ctrl-l:clear-query' --prompt='Buffers> ' --preview-window='nohidden:border:nowrap:right:60%' --preview="
-        .. shell
-        .. " --height=100% --ansi --info=inline --expect=ctrl-s,ctrl-v,ctrl-x,ctrl-t --multi"
+      .. shell
+      .. " --height=100% --ansi --info=inline --expect=ctrl-s,ctrl-v,ctrl-x,ctrl-t --multi"
     )
     if not choices then
       return
@@ -692,14 +690,8 @@ end
 function M.initialize_tab_data(opt)
   local tabs = {}
   for t = 1, vim.fn.tabpagenr("$") do
-    tabs[#tabs + 1] = Tab:new({ tabnr = t, options = opt })
+    tabs[t] = Tab:new({ tabnr = t, options = opt })
   end
-  local old_data = vim.fn.json_decode(vim.g.tabline_tab_data)
-  local data = {}
-  for t = 1, vim.fn.tabpagenr("$") do
-    data[t] = old_data[t]
-  end
-  vim.g.tabline_tab_data = vim.fn.json_encode(data)
   return tabs
 end
 
@@ -732,10 +724,31 @@ function M.tabline_tabs(opt)
     end
   end
   line = M.format_tabs(tabs)
+  M.store_session_data()
   return line
   -- local line = '%=%#TabLineFill#%999X' .. '%#tabline_a_to_c#' .. opt.section_right .. '%#tabline_a_normal#' .. ' '
   --                  .. vim.fn.tabpagenr() .. '/' .. vim.fn.tabpagenr('$') .. ' '
   -- return line
+end
+
+function M.store_session_data()
+  local data = {}
+  for i = 1, vim.fn.tabpagenr("$") do
+    data[i] = vim.fn.gettabvar(i, "tabline_data")
+  end
+  vim.g.Tabline_session_data = vim.fn.json_encode(data)
+end
+
+function M.on_session_load_post()
+  if vim.g.Tabline_session_data == nil then
+    return
+  end
+  local data = vim.fn.json_decode(vim.g.Tabline_session_data)
+  for v, k in ipairs(data) do
+    vim.fn.settabvar(v, "tabline_data", k)
+  end
+  vim.cmd([[redrawstatus]])
+  vim.cmd([[redrawtabline]])
 end
 
 function M.highlight_groups()
@@ -805,7 +818,6 @@ end
 
 function M.setup(opts)
   vim.cmd([[
-    let g:tabline_tab_data = get(g:, "tabline_tab_data", '{}')
     let g:tabline_show_devicons = get(g:, "tabline_show_devicons", v:true)
     let g:tabline_show_bufnr = get(g:, "tabline_show_bufnr", v:false)
     let g:tabline_show_filename_only = get(g:, "tabline_show_filename_only", v:false)
@@ -943,6 +955,9 @@ function M.setup(opts)
     command! -nargs=1 TablineTabRename lua require('tabline').tab_rename(<f-args>)
 
     command! TablineToggleShowAllBuffers lua require('tabline').toggle_show_all_buffers()
+
+    autocmd SessionLoadPost * lua require'tabline'.on_session_load_post()
+
   ]])
 
   function _G.tabline_buffers_tabs()
