@@ -489,10 +489,10 @@ end
 function M._bind_buffers(args)
   local filelist = {}
   if #args == 0 then
-    filelist[#filelist + 1] = vim.fn.expand("%:p:~")
+    filelist[vim.fn.expand("%:p:~")] = true
   else
     for _, buffer_name in pairs(args) do
-      filelist[#filelist + 1] = vim.fn.fnamemodify(vim.fn.expand(buffer_name), ":p:~")
+      filelist[vim.fn.fnamemodify(vim.fn.expand(buffer_name), ":p:~")] = true
     end
   end
   local data = vim.t.tabline_data
@@ -568,15 +568,6 @@ function M.fzf_bind_buffers()
   end)()
 end
 
-local function contains(list, x)
-  for i, v in pairs(list) do
-    if v == x then
-      return true
-    end
-  end
-  return false
-end
-
 function M.tabline_buffers(opt)
   opt = M.options
 
@@ -595,7 +586,7 @@ function M.tabline_buffers(opt)
         buffers[#buffers + 1] = buffer
       else
         local filepath = vim.fn.expand("#" .. buffer.bufnr .. ":p:~")
-        if current_tab and contains(current_tab.allowed_buffers, filepath) then
+        if current_tab and current_tab.allowed_buffers[filepath] then
           buffers[#buffers + 1] = buffer
         end
       end
