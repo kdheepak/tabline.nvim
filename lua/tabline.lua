@@ -363,7 +363,12 @@ local function nrmap(nr, map)
   local ret = ''
   while ( tmp ~= 0 )
   do
-    ret = map[tmp%10+1] .. ret
+    local mapval = map[tmp%10+1]
+    if mapval then
+      ret = map[tmp%10+1] .. ret
+    else
+      ret = tmp%10 .. ret
+    end
     tmp = math.floor(tmp/10)
   end
   return ret
