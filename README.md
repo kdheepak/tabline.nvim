@@ -33,6 +33,8 @@ use {
         show_tabs_always = false, -- this shows tabs only when there are more than one tab or if the first tab is named
         show_devicons = true, -- this shows devicons in buffer section
         show_bufnr = false, -- this appends [bufnr] to buffer section,
+        bufnr_style = { '⁰', '¹', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹' }, -- this change the [bufnr] style
+        bufnr_direction = true, -- set true to put buffer number at title's left
         show_filename_only = false, -- shows base filename only instead of relative path in filename
         modified_icon = "+ ", -- change the default modified icon
         modified_italic = false, -- set to true by default; this determines whether the filename turns italic if modified
