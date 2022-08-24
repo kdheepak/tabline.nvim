@@ -803,6 +803,19 @@ function M.buffer_next()
   end
 end
 
+function M.buffer_goto( index )
+  local next
+  for _, buffer in pairs(M.buffers) do
+    local next_buffer = M.buffers[M.mod(tonumber(index), #M.buffers)]
+    if buffer.current and next_buffer ~= nil then
+      next = next_buffer.bufnr
+    end
+  end
+  if next ~= nil then
+    vim.cmd("silent! buffer " .. next)
+  end
+end
+
 function M.buffer_previous()
   local previous
   for i, buffer in pairs(M.buffers) do
@@ -939,6 +952,7 @@ function M.setup(opts)
 
     command! -count TablineBufferNext             :lua require'tabline'.buffer_next()
     command! -count TablineBufferPrevious         :lua require'tabline'.buffer_previous()
+    command! -count=1 TablineBufferGoTo             :lua require'tabline'.buffer_goto(<count>)
 
     command! -nargs=* -complete=file TablineTabNew :lua require'tabline'.tab_new(<f-args>)
     command! -nargs=+ -complete=buffer TablineBuffersBind :lua require'tabline'.bind_buffers(<f-args>)

@@ -78,6 +78,10 @@ Clear the binding of current tab's buffers.
 
 Rename current tab's name.
 
+### :<count>TablineBufferGoto
+
+Move to specified buffer in the tabline
+
 # Configuration
 
 You can customize the behavior of this extension by setting values for any of the following optional parameters.
