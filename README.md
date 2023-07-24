@@ -1,5 +1,13 @@
 # tabline.nvim
 
+This plugin is archived. Check out the following instead:
+
+- https://github.com/backdround/tabscope.nvim
+- https://github.com/tiagovla/scope.nvim
+- https://github.com/nvim-lualine/lualine.nvim
+
+---
+
 A "buffer and tab" tabline:
 
 - Show buffers and tabs in tabline
