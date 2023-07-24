@@ -1,4 +1,4 @@
-*tabline.txt*             For NVIM v0.8.0            Last change: 2023 June 03
+*tabline.txt*             For NVIM v0.8.0            Last change: 2023 July 24
 
 ==============================================================================
 Table of Contents                                  *tabline-table-of-contents*
@@ -8,6 +8,13 @@ Table of Contents                                  *tabline-table-of-contents*
 3. Usage                                                       |tabline-usage|
 4. Configuration                                       |tabline-configuration|
 5. Lualine tabline support                   |tabline-lualine-tabline-support|
+This plugin is archived. Check out the following instead:
+
+- https://github.com/backdround/tabscope.nvim
+- https://github.com/tiagovla/scope.nvim
+- https://github.com/nvim-lualine/lualine.nvim
+
+------------------------------------------------------------------------------
 
 ==============================================================================
 1. tabline.nvim                                         *tabline-tabline.nvim*
