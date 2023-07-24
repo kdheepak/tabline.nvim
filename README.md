@@ -1,4 +1,3 @@
-# tabline.nvim
 
 This plugin is archived. Check out the following instead:
 
@@ -7,6 +6,8 @@ This plugin is archived. Check out the following instead:
 - https://github.com/nvim-lualine/lualine.nvim
 
 ---
+
+# tabline.nvim
 
 A "buffer and tab" tabline:
 
