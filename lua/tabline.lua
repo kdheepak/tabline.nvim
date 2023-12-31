@@ -358,6 +358,31 @@ function Buffer:name()
   return vim.fn.pathshorten(vim.fn.fnamemodify(self.file, ":p:."))
 end
 
+local function nrmap(nr, map)
+  local tmp = nr
+  local ret = ''
+  while ( tmp ~= 0 )
+  do
+    local mapval = map[tmp%10+1]
+    if mapval then
+      ret = map[tmp%10+1] .. ret
+    else
+      ret = tmp%10 .. ret
+    end
+    tmp = math.floor(tmp/10)
+  end
+  return ret
+end
+
+function Buffer:bufnr_render(bufnr)
+  local style = M.options.bufnr_style
+  if style then
+    return nrmap(bufnr, style)
+  else
+    return "[" .. bufnr .. "] "
+  end
+end
+
 function Buffer:render()
   local line = self:hl()
       .. "%"
@@ -368,13 +393,22 @@ function Buffer:render()
         .. " "
         .. self.icon
   end
-  line = line
-      .. " "
-      .. self.name
-      .. " "
-      .. self.modified_icon
   if M.options.show_bufnr then
-    line = line .. "[" .. self.bufnr .. "] "
+    if M.options.bufnr_direction then
+      line = line
+          .. " "
+          .. self:bufnr_render(self.bufnr)
+          .. self.name
+          .. " "
+          .. self.modified_icon
+    else
+      line = line
+          .. " "
+          .. self.name
+          .. " "
+          .. self.modified_icon
+          .. self:bufnr_render(self.bufnr)
+    end
   end
   line = line .. "%T" .. self:separator()
   return line
@@ -889,6 +923,18 @@ function M.setup(opts)
     M.options.show_bufnr = opts.options.show_bufnr
   else
     M.options.show_bufnr = vim.g.tabline_show_bufnr
+  end
+
+  if opts.options.bufnr_style ~= nil then
+    M.options.bufnr_style = opts.options.bufnr_style
+  else
+    M.options.bufnr_style = vim.g.tabline_bufnr_style
+  end
+
+  if opts.options.bufnr_direction ~= nil then
+    M.options.bufnr_direction = opts.options.bufnr_direction
+  else
+    M.options.bufnr_direction = vim.g.tabline_bufnr_direction
   end
 
   if opts.options.show_devicons ~= nil then
